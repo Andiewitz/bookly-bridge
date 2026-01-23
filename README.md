@@ -25,9 +25,9 @@
 
 ### Frontend Foundation
 - [x] **Design System**: "Glassmorphism" theme, Oklch colors, Outfit/Inter typography.
+- [x] **Auth UI Redesign**: Split-screen, amber-themed login/register pages.
+- [x] **Dashboard UI Redesign**: Unified Sidebar (Design 2), Top Bar, and Feed cards.
 - [x] **Components**: Reusable `Base` (Inputs/Buttons), `Skeleton`, and Glass Cards.
-- [x] **Auth Flow**: Login/Register pages with Demo login functionality.
-- [x] **Dashboard Shell**: Role-based routing and navigation structure.
 
 ---
 
@@ -35,20 +35,29 @@
 *Goal: Complete the core functionality with the premium "Glass" aesthetic.*
 
 ### 1. Gig Management (The "Meat")
-- [ ] **Post a Gig (Venue)**: Form to create new listings (Date, Pay, Genre).
-- [ ] **Gig Discovery (Band)**: Browse page with filters (Date, Location, Genre).
+- [ ] **Wiring the Feed**: Connect the "Discover" and "Home" feeds to real backend data.
+- [ ] **Rich Filters**: Implement backend logic for Genre, Location, Date, and Price Range.
+- [ ] **Post a Gig (Venue)**: Form to create new listings (Date, Pay, Genre, Image).
+- [ ] **Post Availability (Band)**: Form to announce available dates.
 - [ ] **Application Flow**:
-    - Band clicks "I'm Available".
+    - Band clicks "Apply Now".
     - Venue sees "Incoming Requests".
     - Venue accepts/declines.
 
-### 2. Profile Management
-- [ ] **Edit Profile Forms**: finish the inputs for Bands (Bio, Demo URL) and Venues (Capacity, Specs).
-- [ ] **Profile View**: Polish the "Public View" of a band or venue card.
+### 2. Auth & Onboarding Revamp
+- [ ] **Profile Onboarding**: Step-by-step flow for users to complete their 75% profile.
+- [ ] **Band Details**: Collect Bio, Soundcloud/Spotify links, Equipment list.
+- [ ] **Venue Details**: Collect Capacity, PA Specs, Stage Size.
+- [ ] **Profile Completion Logic**: Wire the sidebar widget to reflect real data.
 
-### 3. Application "Glue"
-- [ ] **Contact Reveal**: The functionality where a confirmed match reveals WhatsApp/Email/IG.
-- [ ] **Search**: Wire up the specific search endpoints to the UI search bar.
+### 3. Messaging & Notifications (The "Glue")
+- [ ] **Messaging System**: Basic threaded messages between bands and venues.
+- [ ] **Top-Bar Badge Logic**: Real-time (or polling) updates for Messages and Notifications.
+- [ ] **Contact Reveal**: Confirmed matches reveal WhatsApp/Email/IG.
+
+### 4. Search & Discovery
+- [ ] **Global Search**: Wire the top search bar to return Bands, Venues, and Gigs.
+- [ ] **Map View**: (Bonus) Quick view of where gigs are located in NYC.
 
 ---
 

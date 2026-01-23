@@ -4,15 +4,19 @@ import { persist } from 'zustand/middleware';
 interface User {
     id: string;
     email: string;
-    role: 'band' | 'venue';
+    role?: 'band' | 'venue';
+    has_band_profile: boolean;
+    has_venue_profile: boolean;
 }
 
 interface AuthState {
     user: User | null;
+    currentContext: 'finding' | 'hosting';
     accessToken: string | null;
     refreshToken: string | null;
     isAuthenticated: boolean;
     setAuth: (user: User, accessToken: string, refreshToken: string) => void;
+    switchContext: (context: 'finding' | 'hosting') => void;
     logout: () => void;
 }
 
@@ -20,6 +24,7 @@ export const useAuthStore = create<AuthState>()(
     persist(
         (set) => ({
             user: null,
+            currentContext: 'finding',
             accessToken: null,
             refreshToken: null,
             isAuthenticated: false,
@@ -29,11 +34,12 @@ export const useAuthStore = create<AuthState>()(
                 }
                 set({ user, accessToken, refreshToken, isAuthenticated: true });
             },
+            switchContext: (context) => set({ currentContext: context }),
             logout: () => {
                 if (typeof window !== 'undefined') {
                     localStorage.removeItem('access_token');
                 }
-                set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false });
+                set({ user: null, currentContext: 'finding', accessToken: null, refreshToken: null, isAuthenticated: false });
             },
         }),
         {

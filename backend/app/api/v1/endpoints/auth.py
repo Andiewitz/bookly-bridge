@@ -24,7 +24,6 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)) -> Any:
     db_user = User(
         email=user_in.email,
         password_hash=auth.get_password_hash(user_in.password),
-        role=user_in.role,
     )
     db.add(db_user)
     db.commit()
@@ -47,55 +46,4 @@ def login(user_in: UserLogin, db: Session = Depends(get_db)) -> Any:
         "token_type": "bearer",
     }
 
-@router.post("/demo-seed")
-def seed_demo_data(db: Session = Depends(get_db)):
-    # Create Band Demo
-    band_email = "band@demo.com"
-    band_user = db.query(User).filter(User.email == band_email).first()
-    if not band_user:
-        band_user = User(
-            id=uuid.uuid4(),
-            email=band_email,
-            password_hash=auth.get_password_hash("password123"),
-            role="band"
-        )
-        db.add(band_user)
-        db.flush()
-        db.add(BandProfile(
-            user_id=band_user.id,
-            band_name="The Booklyn Rockers",
-            genre="Rock",
-            location_city="New York",
-            location_state="NY",
-            bio="Just a demo band rocking the Booklyn app.",
-            contact_method="email",
-            contact_email=band_email
-        ))
 
-    # Create Venue Demo
-    venue_email = "venue@demo.com"
-    venue_user = db.query(User).filter(User.email == venue_email).first()
-    if not venue_user:
-        venue_user = User(
-            id=uuid.uuid4(),
-            email=venue_email,
-            password_hash=auth.get_password_hash("password123"),
-            role="venue"
-        )
-        db.add(venue_user)
-        db.flush()
-        db.add(VenueProfile(
-            user_id=venue_user.id,
-            venue_name="The Vinyl Lounge",
-            location_city="Brooklyn",
-            location_state="NY",
-            capacity=200,
-            bio="Coolest demo venue in town.",
-            typical_genres=["Rock", "Jazz", "Blues"],
-            contact_method="instagram",
-            instagram="vinyllounge_demo",
-            contact_email=venue_email
-        ))
-    
-    db.commit()
-    return {"message": "Demo data seeded successfully"}

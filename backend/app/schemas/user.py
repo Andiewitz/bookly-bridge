@@ -5,7 +5,7 @@ from datetime import datetime
 
 class UserBase(BaseModel):
     email: EmailStr
-    role: str
+    role: Optional[str] = None
 
 class UserCreate(UserBase):
     password: str
@@ -17,6 +17,8 @@ class UserLogin(BaseModel):
 class UserResponse(UserBase):
     id: UUID
     created_at: datetime
+    has_band_profile: bool = False
+    has_venue_profile: bool = False
 
     class Config:
         from_attributes = True

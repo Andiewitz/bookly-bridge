@@ -3,48 +3,59 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models.user import User
-from app.models.gig import GigPosting
-from app.schemas.gig import GigPostingCreate, GigPostingUpdate, GigPostingResponse
+from app.models.gig_mongo import GigPost
+from app.schemas.gig import MongoGigPostCreate, MongoGigPostResponse
 from app.api.deps import get_current_user
 
 router = APIRouter()
 
-@router.post("/", response_model=GigPostingResponse)
-def create_gig_posting(
-    gig_in: GigPostingCreate,
+@router.post("/", response_model=MongoGigPostResponse)
+async def create_gig_posting(
+    gig_in: MongoGigPostCreate,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
 ) -> Any:
-    if current_user.role != "venue":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only venues can create gig postings."
-        )
+    # In a real app, we'd check if they have a venue profile. 
+    # For now, we'll use the 'author_name' from the email or a placeholder.
     
-    db_gig = GigPosting(venue_id=current_user.id, **gig_in.dict())
-    db.add(db_gig)
-    db.commit()
-    db.refresh(db_gig)
-    return db_gig
+    new_post = GigPost(
+        author_id=current_user.id,
+        author_name=current_user.email.split('@')[0].capitalize(), # Simple fallback
+        avatar_char=current_user.email[0].upper(),
+        **gig_in.dict()
+    )
+    await new_post.insert()
+    
+    # Return with string ID
+    res_dict = new_post.dict()
+    res_dict["id"] = str(new_post.id)
+    return res_dict
 
-@router.get("/", response_model=List[GigPostingResponse])
-def list_gig_postings(
-    genre: Optional[str] = None,
-    location: Optional[str] = None,
-    db: Session = Depends(get_db)
+@router.get("/", response_model=List[MongoGigPostResponse])
+async def list_gig_postings(
+    genre: Optional[str] = None
 ) -> Any:
-    query = db.query(GigPosting)
     if genre:
-        query = query.filter(GigPosting.genre == genre)
-    # Add more complex location filtering if needed
-    return query.all()
+        posts = await GigPost.find(GigPost.genre == genre).to_list()
+    else:
+        posts = await GigPost.find_all().to_list()
+    
+    # Map to responses with string IDs
+    results = []
+    for p in posts:
+        pd = p.dict()
+        pd["id"] = str(p.id)
+        results.append(pd)
+    return results
 
-@router.get("/{id}", response_model=GigPostingResponse)
-def get_gig_posting(
-    id: Any,
-    db: Session = Depends(get_db)
+@router.get("/{id}", response_model=MongoGigPostResponse)
+async def get_gig_posting(
+    id: str
 ) -> Any:
-    gig = db.query(GigPosting).filter(GigPosting.id == id).first()
-    if not gig:
+    from beanie import PydanticObjectId
+    post = await GigPost.get(PydanticObjectId(id))
+    if not post:
         raise HTTPException(status_code=404, detail="Gig not found")
-    return gig
+    
+    pd = post.dict()
+    pd["id"] = str(post.id)
+    return pd

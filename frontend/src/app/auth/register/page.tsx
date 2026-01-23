@@ -9,7 +9,6 @@ import Link from 'next/link';
 import { Music2, Eye, EyeOff } from 'lucide-react';
 
 export default function RegisterPage() {
-    const [role, setRole] = useState<'band' | 'venue'>('band');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -22,11 +21,11 @@ export default function RegisterPage() {
         setLoading(true);
         setError('');
         try {
-            const response = await api.post('/auth/register', { ...data, role });
+            await api.post('/auth/register', data);
             const loginRes = await api.post('/auth/login', { email: data.email, password: data.password });
             const { access_token, refresh_token } = loginRes.data;
 
-            setAuth(response.data, access_token, refresh_token);
+            setAuth(loginRes.data, access_token, refresh_token);
             router.push('/dashboard');
         } catch (err: any) {
             setError(err.response?.data?.detail || 'Registration failed. Please try again.');
@@ -76,30 +75,6 @@ export default function RegisterPage() {
                     <div className="mb-10">
                         <h1 className="font-display text-4xl font-bold tracking-tight text-white mb-3">Create Account</h1>
                         <p className="text-white/50 text-base">Join the music community and start connecting.</p>
-                    </div>
-
-                    {/* Role Selector */}
-                    <div className="flex p-1 bg-[#212121] rounded-xl mb-8">
-                        <button
-                            type="button"
-                            onClick={() => setRole('band')}
-                            className={`flex-1 py-3 rounded-lg text-sm font-bold font-display uppercase tracking-wide transition-all ${role === 'band'
-                                ? 'bg-[#ff8c00] text-[#121212] shadow-lg'
-                                : 'text-white/50 hover:text-white/80'
-                                }`}
-                        >
-                            I'm a Band
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setRole('venue')}
-                            className={`flex-1 py-3 rounded-lg text-sm font-bold font-display uppercase tracking-wide transition-all ${role === 'venue'
-                                ? 'bg-[#ff8c00] text-[#121212] shadow-lg'
-                                : 'text-white/50 hover:text-white/80'
-                                }`}
-                        >
-                            I'm a Venue
-                        </button>
                     </div>
 
                     {/* Registration Form */}

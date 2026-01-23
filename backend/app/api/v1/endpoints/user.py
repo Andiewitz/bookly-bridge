@@ -10,4 +10,10 @@ router = APIRouter()
 def read_user_me(
     current_user: User = Depends(get_current_user),
 ) -> Any:
-    return current_user
+    return {
+        "id": current_user.id,
+        "email": current_user.email,
+        "created_at": current_user.created_at,
+        "has_band_profile": current_user.band_profile is not None,
+        "has_venue_profile": current_user.venue_profile is not None
+    }

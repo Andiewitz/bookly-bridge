@@ -1,8 +1,13 @@
+from app.db.mongo import init_mongo
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.endpoints import auth, profile, gig, request, user
 
 app = FastAPI(title="Booklyn API", version="0.1.0")
+
+@app.on_event("startup")
+async def startup_event():
+    await init_mongo()
 
 # Configure CORS
 app.add_middleware(

@@ -37,31 +37,6 @@ export default function LoginPage() {
         }
     };
 
-    const handleDemoLogin = async (type: 'band' | 'venue') => {
-        setLoading(true);
-        setError('');
-        try {
-            await api.post('/auth/demo-seed');
-
-            const credentials = {
-                email: type === 'band' ? 'band@demo.com' : 'venue@demo.com',
-                password: 'password123'
-            };
-
-            const response = await api.post('/auth/login', credentials);
-            const { access_token, refresh_token } = response.data;
-            localStorage.setItem('access_token', access_token);
-
-            const profileRes = await api.get('/users/me');
-            setAuth(profileRes.data, access_token, refresh_token);
-            router.push('/dashboard');
-        } catch (err: any) {
-            setError('Demo login failed. Is the server running?');
-        } finally {
-            setLoading(false);
-        }
-    };
-
     return (
         <div className="flex h-screen w-full flex-col lg:flex-row overflow-hidden">
             {/* Left Side: Immersive Visual Panel */}
@@ -103,37 +78,7 @@ export default function LoginPage() {
                     {/* Header */}
                     <div className="mb-10">
                         <h1 className="font-display text-4xl font-bold tracking-tight text-white mb-3">Welcome Back</h1>
-                        <p className="text-white/50 text-base">Enter your credentials to access your collection.</p>
-                    </div>
-
-                    {/* Demo Login Buttons */}
-                    <div className="flex flex-col gap-4 mb-10">
-                        <button
-                            onClick={() => handleDemoLogin('band')}
-                            disabled={loading}
-                            className="flex w-full items-center justify-center gap-3 rounded-xl border border-[#424242] bg-transparent h-14 transition-colors hover:bg-[#212121] group disabled:opacity-50"
-                        >
-                            <Music2 className="h-5 w-5 text-white group-hover:text-[#ff8c00] transition-colors" />
-                            <span className="font-display font-medium text-sm tracking-wide uppercase">Demo as Band</span>
-                        </button>
-                        <button
-                            onClick={() => handleDemoLogin('venue')}
-                            disabled={loading}
-                            className="flex w-full items-center justify-center gap-3 rounded-xl border border-[#424242] bg-transparent h-14 transition-colors hover:bg-[#212121] group disabled:opacity-50"
-                        >
-                            <Music2 className="h-5 w-5 text-white group-hover:text-[#ff8c00] transition-colors" />
-                            <span className="font-display font-medium text-sm tracking-wide uppercase">Demo as Venue</span>
-                        </button>
-                    </div>
-
-                    {/* Divider */}
-                    <div className="relative my-10">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-[#424242]" />
-                        </div>
-                        <div className="relative flex justify-center text-sm">
-                            <span className="bg-[#121212] px-4 font-display text-white/40 uppercase tracking-widest">or</span>
-                        </div>
+                        <p className="text-white/50 text-base">Enter your credentials to access your account.</p>
                     </div>
 
                     {/* Manual Login Form */}

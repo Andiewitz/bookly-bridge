@@ -25,7 +25,7 @@ class BandProfile(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-    user = relationship("User", backref="band_profile")
+    user = relationship("User", back_populates="band_profile")
 
 class VenueProfile(Base):
     __tablename__ = "venue_profiles"
@@ -46,4 +46,4 @@ class VenueProfile(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-    user = relationship("User", backref="venue_profile")
+    user = relationship("User", back_populates="venue_profile")

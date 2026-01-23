@@ -26,6 +26,24 @@ class GigPostingResponse(GigPostingBase):
     class Config:
         from_attributes = True
 
+# MongoDB Gig Post Schemas
+class MongoGigPostCreate(BaseModel):
+    title: str
+    description: str
+    genre: str
+    date: str
+    time: str
+    pay: str
+    tags: List[str] = []
+    photo_url: Optional[str] = None
+
+class MongoGigPostResponse(MongoGigPostCreate):
+    id: str  # String representation of ObjectId
+    author_id: UUID
+    author_name: str
+    avatar_char: str
+    created_at: datetime
+
 class GigRequestBase(BaseModel):
     available_from: date
     available_to: date

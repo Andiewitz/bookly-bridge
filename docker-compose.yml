@@ -2,7 +2,7 @@ services:
   db:
     image: postgres:16
     container_name: booklyn_db
-    restart: always
+    restart: "no"
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
@@ -13,21 +13,31 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./backend/app/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
       timeout: 5s
       retries: 5
+
+  mongodb:
+    image: mongo:6
+    container_name: booklyn_mongo
+    restart: "no"
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
 
   backend:
     build:
       context: ./backend
     container_name: booklyn_backend
-    restart: always
+    restart: "no"
     environment:
       - POSTGRES_HOST=db
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=booklyn
+      - MONGO_URL=mongodb://mongodb:27017/booklyn
       - SECRET_KEY=booklyn-dev-secret-key-12345
     ports:
       - "8000:8000"
@@ -36,12 +46,14 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      mongodb:
+        condition: service_started
 
   frontend:
     build:
       context: ./frontend
     container_name: booklyn_frontend
-    restart: always
+    restart: "no"
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
     ports:
@@ -54,3 +66,4 @@ services:
 
 volumes:
   postgres_data:
+  mongodb_data:
