@@ -1,7 +1,7 @@
 from app.db.mongo import init_mongo
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.v1.endpoints import auth, profile, gig, request, user
+from app.api.v1.endpoints import auth, profile, gig, request, user, application
 
 app = FastAPI(title="Booklyn API", version="0.1.0")
 
@@ -23,6 +23,7 @@ app.include_router(profile.router, prefix="/api/v1/profile", tags=["profile"])
 app.include_router(gig.router, prefix="/api/v1/gigs", tags=["gigs"])
 app.include_router(request.router, prefix="/api/v1/gig-requests", tags=["gig-requests"])
 app.include_router(user.router, prefix="/api/v1/users", tags=["users"])
+app.include_router(application.router, prefix="/api/v1/applications", tags=["applications"])
 
 @app.get("/")
 async def root():

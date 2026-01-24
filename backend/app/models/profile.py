@@ -21,6 +21,7 @@ class BandProfile(Base):
     youtube = Column(String(255))
     contact_method = Column(String(20)) # whatsapp, instagram, email
     whatsapp_number = Column(String(20))
+    messenger_username = Column(String(255))
     contact_email = Column(String(255))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
@@ -41,6 +42,7 @@ class VenueProfile(Base):
     typical_genres = Column(ARRAY(String))
     contact_method = Column(String(20)) # whatsapp, instagram, email
     whatsapp_number = Column(String(20))
+    messenger_username = Column(String(255))
     instagram = Column(String(255))
     contact_email = Column(String(255))
     created_at = Column(DateTime(timezone=True), server_default=func.now())

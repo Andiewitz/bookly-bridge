@@ -31,6 +31,7 @@ class MongoGigPostCreate(BaseModel):
     title: str
     description: str
     genre: str
+    borough: Optional[str] = None
     date: str
     time: str
     pay: str

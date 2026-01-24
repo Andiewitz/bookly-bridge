@@ -146,4 +146,17 @@
   .text-gradient-primary {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
   }
+
+  /* Micro-animations */
+  .hover-lift {
+    @apply transition-transform duration-300 hover:-translate-y-1;
+  }
+
+  .hover-glow {
+    @apply transition-all duration-300 hover:shadow-[0_0_20px_rgba(255, 140, 0, 0.15)];
+  }
+
+  .focus-ring {
+    @apply focus:ring-2 focus:ring-[#ff8c00]/50 focus:border-[#ff8c00] outline-none transition-all;
+  }
 }

@@ -1,11 +1,65 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
-import { ChevronDown, MapPin, Calendar, DollarSign, Star, Zap, ArrowRight } from 'lucide-react';
+import { ChevronDown, MapPin, Calendar, DollarSign, Search, Loader2, Music2, Heart, Share2, Clock } from 'lucide-react';
+import api from '@/services/api';
 
 export default function BrowsePage() {
     const { user } = useAuthStore();
+    const [gigs, setGigs] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedBorough, setSelectedBorough] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [applyingId, setApplyingId] = useState<string | null>(null);
+    const [appliedIds, setAppliedIds] = useState<Set<string>>(new Set());
+
+    const fetchGigs = async () => {
+        setLoading(true);
+        try {
+            const params = new URLSearchParams();
+            if (selectedBorough) params.append('borough', selectedBorough);
+            if (searchQuery) params.append('search', searchQuery);
+
+            const res = await api.get(`/gigs/?${params.toString()}`);
+            setGigs(res.data);
+        } catch (err) {
+            console.error('Failed to fetch gigs:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchApplications = async () => {
+        try {
+            const res = await api.get('/applications/my-applications');
+            setAppliedIds(new Set(res.data.map((a: any) => a.gig_id)));
+        } catch (err) {
+            console.error('Failed to fetch applications:', err);
+        }
+    };
+
+    useEffect(() => {
+        fetchGigs();
+        if (user) fetchApplications();
+    }, [selectedBorough]);
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        fetchGigs();
+    };
+
+    const handleApply = async (gigId: string) => {
+        setApplyingId(gigId);
+        try {
+            await api.post('/applications/', { gig_id: gigId, message: "Interested!" });
+            setAppliedIds(prev => new Set(prev).add(gigId));
+        } catch (err) {
+            console.error('Failed to apply:', err);
+        } finally {
+            setApplyingId(null);
+        }
+    };
 
     return (
         <div className="p-8 pb-20 scroll-smooth">
@@ -13,150 +67,109 @@ export default function BrowsePage() {
                 {/* Page Heading Section */}
                 <div className="flex flex-col gap-6">
                     <div className="flex flex-col gap-2">
-                        <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white uppercase">Discover New Talent</h1>
+                        <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white uppercase">Discover Gigs</h1>
                         <p className="text-lg text-[#bcad9a] max-w-2xl">
-                            Connect with the best local bands and book the perfect venues for your next gig.
+                            The best local opportunities, validated by the community. Direct booking, zero fees.
                         </p>
                     </div>
 
                     {/* Filters Row */}
-                    <div className="flex flex-wrap items-center gap-3">
-                        <button className="flex h-9 items-center gap-2 rounded-full bg-[#ff8c00] px-4 text-sm font-bold text-black shadow-[0_0_15px_rgba(255,140,0,0.3)] transition-transform active:scale-95">
-                            <span className="material-symbols-outlined text-[18px]">tune</span>
-                            All Filters
-                        </button>
-                        <div className="h-6 w-[1px] bg-[#3a3127] mx-1" />
+                    <div className="flex flex-wrap items-center gap-4 bg-[#1E1E1E] p-4 rounded-2xl border border-[#3a3127]">
+                        <form onSubmit={handleSearch} className="flex-1 min-w-[300px] relative">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-[#bcad9a]" />
+                            <input
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full bg-black border border-[#3a3127] rounded-xl pl-12 pr-4 py-3 text-white focus:border-[#ff8c00] outline-none transition-all"
+                                placeholder="Search by title, genre, or keywords..."
+                            />
+                        </form>
 
-                        {/* Filter Chips */}
-                        <button className="flex h-9 items-center gap-2 rounded-full border border-[#3a3127] bg-[#1E1E1E] px-4 text-sm font-medium text-white transition-colors hover:border-[#ff8c00] hover:text-[#ff8c00]">
-                            <span>Genre</span>
-                            <ChevronDown className="w-4 h-4" />
-                        </button>
-                        <button className="flex h-9 items-center gap-2 rounded-full border border-[#3a3127] bg-[#1E1E1E] px-4 text-sm font-medium text-white transition-colors hover:border-[#ff8c00] hover:text-[#ff8c00]">
-                            <span>Location</span>
-                            <ChevronDown className="w-4 h-4" />
-                        </button>
-                        <button className="flex h-9 items-center gap-2 rounded-full border border-[#3a3127] bg-[#1E1E1E] px-4 text-sm font-medium text-white transition-colors hover:border-[#ff8c00] hover:text-[#ff8c00]">
-                            <span>Date</span>
-                            <Calendar className="w-4 h-4" />
-                        </button>
-                        <button className="flex h-9 items-center gap-2 rounded-full border border-[#3a3127] bg-[#1E1E1E] px-4 text-sm font-medium text-white transition-colors hover:border-[#ff8c00] hover:text-[#ff8c00]">
-                            <span>Price Range</span>
-                            <DollarSign className="w-4 h-4" />
-                        </button>
-                        <div className="ml-auto text-sm text-[#bcad9a] hidden xl:block">
-                            Showing 124 results in <span className="text-white font-bold">New York, NY</span>
+                        <div className="flex items-center gap-3">
+                            <div className="relative">
+                                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[#ff8c00]" />
+                                <select
+                                    value={selectedBorough}
+                                    onChange={(e) => setSelectedBorough(e.target.value)}
+                                    className="bg-black border border-[#3a3127] rounded-xl pl-10 pr-10 py-3 text-sm text-white focus:border-[#ff8c00] outline-none appearance-none cursor-pointer"
+                                >
+                                    <option value="">All Boroughs</option>
+                                    <option value="Brooklyn">Brooklyn</option>
+                                    <option value="Manhattan">Manhattan</option>
+                                    <option value="Queens">Queens</option>
+                                    <option value="Bronx">The Bronx</option>
+                                    <option value="StatenIsland">Staten Island</option>
+                                </select>
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-gray-500 pointer-events-none" />
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Suggested Bands Grid */}
+                {/* Gigs Grid */}
                 <section className="flex flex-col gap-6">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-                            <span className="text-[#ff8c00]">♪</span> Suggested Bands
-                        </h2>
-                        <a className="text-sm font-bold text-[#ff8c00] hover:underline" href="#">View All</a>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-                        {/* Band Card 1 */}
-                        {[
-                            { name: 'The Neon Lights', location: 'Brooklyn, NY', genres: ['Indie Rock', 'Synth'], rating: 4.9 },
-                            { name: 'Midnight Jazz Trio', location: 'Harlem, NY', genres: ['Jazz', 'Fusion'], rating: 4.7 },
-                            { name: 'Cyber Pulse', location: 'Queens, NY', genres: ['Techno', 'Electronic'], badge: 'New' },
-                            { name: 'Sarah & The Strings', location: 'Lower East Side', genres: ['Folk', 'Acoustic'], rating: 5.0 },
-                        ].map((band, i) => (
-                            <div key={i} className="group relative flex flex-col overflow-hidden rounded-2xl bg-[#1E1E1E] border border-[#3a3127] transition-all hover:border-[#ff8c00]/50 hover:shadow-2xl hover:shadow-[#ff8c00]/10">
-                                <div className="aspect-[4/3] w-full overflow-hidden relative">
-                                    <div className="absolute inset-0 bg-gradient-to-t from-[#1E1E1E] to-transparent opacity-80 z-10" />
-                                    <div className="absolute top-3 right-3 z-20 rounded-full bg-black/60 px-2 py-1 backdrop-blur-sm">
-                                        <div className="flex items-center gap-1 text-xs font-bold text-white">
-                                            {band.rating ? (
-                                                <>
-                                                    <Star className="w-[14px] h-[14px] text-yellow-400 fill-yellow-400" /> {band.rating}
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Zap className="w-[14px] h-[14px] text-white" /> {band.badge}
-                                                </>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="h-full w-full bg-gradient-to-br from-gray-800 to-black transition-transform duration-500 group-hover:scale-110" />
-                                </div>
-                                <div className="flex flex-col gap-4 p-5 pt-2 relative z-20">
-                                    <div>
-                                        <h3 className="font-display text-xl font-bold text-white group-hover:text-[#ff8c00] transition-colors">
-                                            {band.name}
-                                        </h3>
-                                        <div className="mt-1 flex items-center gap-1 text-sm text-[#bcad9a]">
-                                            <MapPin className="w-4 h-4" /> {band.location}
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-wrap gap-2">
-                                        {band.genres.map((genre) => (
-                                            <span key={genre} className="rounded-md bg-[#282828] px-2.5 py-1 text-xs font-semibold text-[#bcad9a] border border-[#3a3127]">
-                                                {genre}
+                    {loading ? (
+                        <div className="flex flex-col items-center justify-center py-20 text-[#bcad9a]">
+                            <Loader2 className="w-10 h-10 animate-spin mb-4 text-[#ff8c00]" />
+                            <p className="font-display font-medium uppercase tracking-widest text-sm">Finding the rhythm...</p>
+                        </div>
+                    ) : gigs.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-20 px-6 bg-[#1e1e1e] rounded-2xl border border border-[#3a3127] text-center">
+                            <Music2 className="size-16 text-[#3a3127] mb-6" />
+                            <h3 className="text-xl font-bold text-white mb-2">No Gigs Found</h3>
+                            <p className="text-[#bcad9a] max-w-sm">Try adjusting your filters or search terms to find more opportunities.</p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                            {gigs.map((gig) => (
+                                <article key={gig.id} className="group relative flex flex-col overflow-hidden rounded-2xl bg-[#1E1E1E] border border-[#3a3127] transition-all duration-300 hover:border-[#ff8c00]/50 hover:shadow-2xl hover:shadow-[#ff8c00]/10 hover-lift hover-glow">
+                                    <div className="p-6">
+                                        <div className="flex items-start justify-between mb-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="size-10 rounded-lg bg-black flex items-center justify-center text-[#ff8c00] font-bold border border-[#3a3127]">
+                                                    {gig.avatar_char}
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-bold text-white group-hover:text-[#ff8c00] transition-colors">{gig.author_name}</h3>
+                                                    <p className="text-[10px] text-[#bcad9a] flex items-center gap-1 uppercase tracking-widest font-bold">
+                                                        <MapPin className="size-3" /> {gig.borough}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <span className="px-2 py-1 bg-black/50 rounded-md text-[9px] font-black text-[#ff8c00] border border-[#ff8c00]/20 uppercase tracking-tighter">
+                                                {gig.genre}
                                             </span>
-                                        ))}
-                                    </div>
-                                    <button className="mt-2 w-full rounded-lg bg-[#ff8c00] py-2.5 text-sm font-bold text-black transition-colors hover:bg-white flex items-center justify-center gap-2 group/btn">
-                                        View Profile
-                                        <ArrowRight className="w-[18px] h-[18px] transition-transform group-hover/btn:translate-x-1" />
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-
-                {/* Divider */}
-                <div className="h-px w-full bg-gradient-to-r from-transparent via-[#3a3127] to-transparent" />
-
-                {/* Featured Venues Grid */}
-                <section className="flex flex-col gap-6">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-                            <span className="text-[#ff8c00]">🎪</span> Featured Venues
-                        </h2>
-                        <a className="text-sm font-bold text-[#ff8c00] hover:underline" href="#">View All</a>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                        {[
-                            { name: 'The Basement', location: 'Williamsburg, Brooklyn', capacity: 250 },
-                            { name: 'Empire Hall', location: 'Midtown, NY', capacity: 800 },
-                            { name: 'Velvet Lounge', location: 'SoHo, NY', capacity: 120 },
-                        ].map((venue, i) => (
-                            <div key={i} className="group flex flex-col overflow-hidden rounded-2xl bg-[#181510] border border-[#3a3127] hover:border-[#bcad9a]/30 transition-colors">
-                                <div className="relative h-48 w-full overflow-hidden">
-                                    <div className="absolute bottom-3 left-3 z-10 flex gap-2">
-                                        <span className="rounded-md bg-black/70 backdrop-blur-md px-2 py-1 text-xs font-bold text-white border border-white/10">
-                                            Cap: {venue.capacity}
-                                        </span>
-                                    </div>
-                                    <div className="h-full w-full bg-gradient-to-br from-gray-900 to-black transition-transform duration-500 group-hover:scale-110" />
-                                </div>
-                                <div className="flex flex-1 flex-col gap-3 p-5">
-                                    <div className="flex items-start justify-between">
-                                        <div>
-                                            <h3 className="font-display text-lg font-bold text-white">{venue.name}</h3>
-                                            <p className="text-sm text-[#bcad9a] mt-1">{venue.location}</p>
                                         </div>
-                                        <div className="rounded-full bg-[#3a3127] p-1.5 text-white">
-                                            <span className="material-symbols-outlined text-[20px]">bookmark_border</span>
+
+                                        <h4 className="text-lg font-bold text-white mb-2 line-clamp-1">{gig.title}</h4>
+                                        <p className="text-sm text-[#bcad9a] mb-6 line-clamp-2 h-10">{gig.description}</p>
+
+                                        <div className="grid grid-cols-2 gap-3 mb-6 bg-black/30 p-4 rounded-xl border border-[#3a3127]">
+                                            <div className="flex flex-col">
+                                                <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1">Date</span>
+                                                <span className="text-xs text-white flex items-center gap-1"><Calendar className="size-3" /> {gig.date}</span>
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1">Pay</span>
+                                                <span className="text-xs text-[#ff8c00] font-bold flex items-center gap-1"><DollarSign className="size-3" /> {gig.pay}</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="mt-auto pt-2">
-                                        <button className="w-full rounded-lg border border-[#3a3127] bg-transparent py-2.5 text-sm font-bold text-white hover:bg-[#3a3127] hover:text-white transition-colors">
-                                            Check Availability
+
+                                        <button
+                                            onClick={() => handleApply(gig.id)}
+                                            disabled={appliedIds.has(gig.id) || applyingId === gig.id}
+                                            className={`w-full py-3 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all ${appliedIds.has(gig.id)
+                                                ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                                                : 'bg-[#ff8c00] text-black hover:shadow-[0_0_15px_rgba(255,140,0,0.3)]'
+                                                }`}
+                                        >
+                                            {applyingId === gig.id ? <Loader2 className="size-4 animate-spin mx-auto" /> : appliedIds.has(gig.id) ? 'Applied' : 'Apply Now'}
                                         </button>
                                     </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                                </article>
+                            ))}
+                        </div>
+                    )}
                 </section>
             </div>
         </div>

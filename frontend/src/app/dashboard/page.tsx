@@ -1,33 +1,59 @@
 import React, { useEffect, useState } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
-import { Heart, Share2, Calendar, Clock, DollarSign, Headphones, MoreHorizontal, Loader2, Music2 } from 'lucide-react';
+import { Heart, Share2, Calendar, Clock, DollarSign, MoreHorizontal, Loader2, Music2 } from 'lucide-react';
 import Link from 'next/link';
 import { OnboardingFlow } from '@/components/auth/OnboardingFlow';
+import ApplicationsView from '@/components/dashboard/ApplicationsView';
 import api from '@/services/api';
 
 export default function DashboardPage() {
     const { user, currentContext } = useAuthStore();
     const [posts, setPosts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [applyingId, setApplyingId] = useState<string | null>(null);
+    const [appliedIds, setAppliedIds] = useState<Set<string>>(new Set());
     const isFinding = currentContext === 'finding';
 
-    useEffect(() => {
-        const fetchPosts = async () => {
-            setLoading(true);
-            try {
-                const res = await api.get('/gigs/');
-                setPosts(res.data);
-            } catch (err) {
-                console.error('Failed to fetch posts:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
+    const fetchPosts = async () => {
+        setLoading(true);
+        try {
+            const res = await api.get('/gigs/');
+            setPosts(res.data);
+        } catch (err) {
+            console.error('Failed to fetch posts:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    const fetchApplications = async () => {
+        try {
+            const res = await api.get('/applications/my-applications');
+            setAppliedIds(new Set(res.data.map((a: any) => a.gig_id)));
+        } catch (err) {
+            console.error('Failed to fetch applications:', err);
+        }
+    };
+
+    useEffect(() => {
         if (user) {
             fetchPosts();
+            if (isFinding) fetchApplications();
         }
-    }, [user, currentContext]);
+    }, [user, currentContext, isFinding]);
+
+    const handleApply = async (gigId: string) => {
+        setApplyingId(gigId);
+        try {
+            await api.post('/applications/', { gig_id: gigId, message: "Interested in this gig!" });
+            setAppliedIds(prev => new Set(prev).add(gigId));
+        } catch (err) {
+            console.error('Failed to apply:', err);
+            alert('Failed to apply. You might have already applied.');
+        } finally {
+            setApplyingId(null);
+        }
+    };
 
     // Onboarding Gate
     if (isFinding && !user?.has_band_profile) {
@@ -40,11 +66,14 @@ export default function DashboardPage() {
 
     return (
         <div className="p-8">
-            <div className="max-w-3xl mx-auto flex flex-col gap-6">
+            <div className="max-w-3xl mx-auto flex flex-col gap-8">
+                {/* Conditional View for Hosts */}
+                {!isFinding && <ApplicationsView />}
+
                 {/* Section Title */}
                 <div className="flex items-center justify-between mb-2">
                     <h2 className="text-xl font-bold font-display text-white">
-                        {isFinding ? 'Recommended Gigs' : 'Recent Activity'}
+                        {isFinding ? 'Recommended Gigs' : 'Your Live Gigs'}
                     </h2>
                     <button className="text-sm text-[#FF8C00] hover:text-white transition-colors">View all</button>
                 </div>
@@ -69,7 +98,7 @@ export default function DashboardPage() {
                 ) : (
                     <div className="flex flex-col gap-6">
                         {posts.map((post) => (
-                            <article key={post.id} className="bg-[#1E1E1E] rounded-2xl border border-[#2A2A2A] overflow-hidden hover:border-[#3a3127] transition-all duration-300 group hover:shadow-2xl hover:shadow-black/50">
+                            <article key={post.id} className="bg-[#1E1E1E] rounded-2xl border border-[#2A2A2A] overflow-hidden transition-all duration-300 group hover:border-[#ff8c00]/50 hover:shadow-2xl hover:shadow-[#ff8c00]/10 hover-lift hover-glow">
                                 <div className="p-6">
                                     {/* Header */}
                                     <div className="flex items-start justify-between mb-4">
@@ -148,9 +177,24 @@ export default function DashboardPage() {
                                                 <Share2 className="w-5 h-5" /> Share
                                             </button>
                                         </div>
-                                        <button className="bg-[#FF8C00] hover:bg-orange-500 text-black font-black uppercase tracking-widest text-[10px] px-6 py-2.5 rounded-xl transition-all shadow-[0_0_15px_rgba(255,140,0,0.1)]">
-                                            Apply Now
-                                        </button>
+                                        {isFinding && (
+                                            <button
+                                                onClick={() => handleApply(post.id)}
+                                                disabled={appliedIds.has(post.id) || applyingId === post.id}
+                                                className={`font-black uppercase tracking-widest text-[10px] px-6 py-2.5 rounded-xl transition-all shadow-[0_0_15px_rgba(255,140,0,0.1)] ${appliedIds.has(post.id)
+                                                    ? 'bg-green-500/20 text-green-400 border border-green-500/30 cursor-default'
+                                                    : 'bg-[#FF8C00] hover:bg-orange-500 text-black'
+                                                    }`}
+                                            >
+                                                {applyingId === post.id ? (
+                                                    <Loader2 className="w-4 h-4 animate-spin mx-auto" />
+                                                ) : appliedIds.has(post.id) ? (
+                                                    'Applied'
+                                                ) : (
+                                                    'Apply Now'
+                                                )}
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </article>

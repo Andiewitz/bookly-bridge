@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Calendar, Clock, DollarSign, Tag, Music2, Loader2 } from 'lucide-react';
+import { X, Calendar, Clock, DollarSign, Tag, Music2, Loader2, MapPin } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import api from '@/services/api';
 
@@ -105,6 +105,24 @@ export function PostGigModal({ isOpen, onClose, onSuccess }: PostGigModalProps) 
                             />
                         </div>
 
+                        {/* Borough */}
+                        <div>
+                            <label className="block text-xs font-bold text-[#bcad9a] uppercase tracking-widest mb-2 ml-1 flex items-center gap-2">
+                                <MapPin className="size-3" /> Borough (NYC)
+                            </label>
+                            <select
+                                {...register('borough', { required: 'Borough is required' })}
+                                className="w-full bg-black border border-[#3a3127] rounded-xl px-5 py-3.5 text-white focus:border-[#ff8c00] outline-none transition-all appearance-none"
+                            >
+                                <option value="">Select Borough</option>
+                                <option value="Brooklyn">Brooklyn</option>
+                                <option value="Manhattan">Manhattan</option>
+                                <option value="Queens">Queens</option>
+                                <option value="Bronx">The Bronx</option>
+                                <option value="StatenIsland">Staten Island</option>
+                            </select>
+                        </div>
+
                         {/* Time */}
                         <div>
                             <label className="block text-xs font-bold text-[#bcad9a] uppercase tracking-widest mb-2 ml-1 flex items-center gap-2">
@@ -145,7 +163,7 @@ export function PostGigModal({ isOpen, onClose, onSuccess }: PostGigModalProps) 
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-4 bg-[#ff8c00] text-black font-black uppercase tracking-widest rounded-xl hover:shadow-[0_0_20px_rgba(255,140,0,0.3)] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                            className="w-full py-4 bg-[#ff8c00] text-black font-black uppercase tracking-widest rounded-xl hover:shadow-[0_0_20px_rgba(255,140,0,0.3)] transition-all flex items-center justify-center gap-3 disabled:opacity-50 hover-glow focus-ring"
                         >
                             {loading ? (
                                 <Loader2 className="w-5 h-5 animate-spin" />

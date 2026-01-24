@@ -18,6 +18,7 @@ interface AuthState {
     setAuth: (user: User, accessToken: string, refreshToken: string) => void;
     switchContext: (context: 'finding' | 'hosting') => void;
     logout: () => void;
+    fetchUser: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -40,6 +41,15 @@ export const useAuthStore = create<AuthState>()(
                     localStorage.removeItem('access_token');
                 }
                 set({ user: null, currentContext: 'finding', accessToken: null, refreshToken: null, isAuthenticated: false });
+            },
+            fetchUser: async () => {
+                const api = (await import('@/services/api')).default;
+                try {
+                    const res = await api.get('/users/me');
+                    set({ user: res.data });
+                } catch (err) {
+                    console.error('Failed to refresh user:', err);
+                }
             },
         }),
         {

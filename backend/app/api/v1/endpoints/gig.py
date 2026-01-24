@@ -32,12 +32,24 @@ async def create_gig_posting(
 
 @router.get("/", response_model=List[MongoGigPostResponse])
 async def list_gig_postings(
-    genre: Optional[str] = None
+    genre: Optional[str] = None,
+    borough: Optional[str] = None,
+    search: Optional[str] = None
 ) -> Any:
+    query = {}
     if genre:
-        posts = await GigPost.find(GigPost.genre == genre).to_list()
-    else:
-        posts = await GigPost.find_all().to_list()
+        query["genre"] = genre
+    if borough:
+        query["borough"] = borough
+    
+    if search:
+        # Simple regex search for zero-data version (no full-text index needed yet)
+        query["$or"] = [
+            {"title": {"$regex": search, "$options": "i"}},
+            {"description": {"$regex": search, "$options": "i"}}
+        ]
+        
+    posts = await GigPost.find(query).to_list()
     
     # Map to responses with string IDs
     results = []
