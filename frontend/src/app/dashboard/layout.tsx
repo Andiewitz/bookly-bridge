@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { DashboardSidebar } from '@/components/layout/DashboardSidebar';
+import { MobileNav } from '@/components/layout/MobileNav';
 import { Search, Bell, MessageSquare, Menu, PlusCircle } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { PostGigModal } from '@/components/dashboard/PostGigModal';
@@ -87,9 +88,12 @@ export default function DashboardLayout({
                 </header>
 
                 {/* Content Area */}
-                <div className="flex-1 overflow-y-auto">
+                <div className="flex-1 overflow-y-auto pb-20 md:pb-0">
                     {children}
                 </div>
+
+                {/* Mobile Navigation */}
+                <MobileNav />
             </main>
         </div>
     );
