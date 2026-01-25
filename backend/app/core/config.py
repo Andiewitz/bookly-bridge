@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     # Direct override for production (Render/Heroku)
     DATABASE_URL_OVERRIDE: Optional[str] = os.getenv("DATABASE_URL")
     
-    MONGO_URL: str = os.getenv("MONGO_URL", "mongodb://localhost:27017/booklyn")
+    MONGO_URL: str = os.getenv("MONGO_URL", "mongodb+srv://gracefulandrei_db_user:jatgmOrnltb2hEO0@cluster0.emd6opx.mongodb.net/?appName=Cluster0")
     
     @property
     def DATABASE_URL(self) -> str:
