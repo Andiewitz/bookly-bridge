@@ -43,11 +43,8 @@ async def list_gig_postings(
         query["borough"] = borough
     
     if search:
-        # Simple regex search for zero-data version (no full-text index needed yet)
-        query["$or"] = [
-            {"title": {"$regex": search, "$options": "i"}},
-            {"description": {"$regex": search, "$options": "i"}}
-        ]
+        # Utilize the text index for high-performance scaleable search
+        query["$text"] = {"$search": search}
         
     posts = await GigPost.find(query).to_list()
     

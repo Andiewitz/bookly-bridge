@@ -21,3 +21,15 @@ class GigPost(Document):
 
     class Settings:
         name = "gig_posts"
+        indexes = [
+            # Compound text index for full-text search
+            [
+                ("title", "text"),
+                ("description", "text"),
+                ("tags", "text"),
+            ],
+            # Individual indexes for frequent filtering
+            "genre",
+            "borough",
+            "created_at",
+        ]

@@ -111,7 +111,9 @@ export default function DashboardPage() {
                                             <div>
                                                 <div className="flex items-center gap-2">
                                                     <h3 className="font-bold font-display text-lg text-white group-hover:text-[#FF8C00] transition-colors">
-                                                        {post.author_name || "The Venue"}
+                                                        <Link href={`/dashboard/profile/${post.author_id}`} className="hover:underline">
+                                                            {post.author_name || "The Venue"}
+                                                        </Link>
                                                     </h3>
                                                     <span className="px-2 py-0.5 rounded-full bg-black border border-gray-800 text-[10px] uppercase tracking-wider text-gray-400">
                                                         Verified
