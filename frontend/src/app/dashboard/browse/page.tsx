@@ -2,10 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
-import { ChevronDown, MapPin, Calendar, DollarSign, Search, Loader2, Music2, Heart, Share2, Clock, Filter, X } from 'lucide-react';
+import { ChevronDown, MapPin, Calendar, DollarSign, Search, Music2, Heart, Share2, Clock, Filter, X, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import api from '@/services/api';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const GENRES = ["All", "Rock", "Jazz", "Blues", "Pop", "Metal", "Country", "Indie", "Electronic", "Techno", "Folk", "Acoustic"];
 
@@ -172,9 +173,28 @@ export default function BrowsePage() {
                 {/* Gigs Grid */}
                 <section className="flex flex-col gap-6">
                     {loading ? (
-                        <div className="flex flex-col items-center justify-center py-20 text-[#bcad9a]">
-                            <Loader2 className="w-10 h-10 animate-spin mb-4 text-[#ff8c00]" />
-                            <p className="font-display font-medium uppercase tracking-widest text-sm animate-pulse">Scanning the airwaves...</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                            {[...Array(6)].map((_, i) => (
+                                <div key={i} className="bg-[#1E1E1E] rounded-2xl border border-[#2A2A2A] p-6 space-y-6">
+                                    <div className="flex items-center gap-3">
+                                        <Skeleton className="size-10 rounded-lg" />
+                                        <div className="space-y-2">
+                                            <Skeleton className="h-4 w-24" />
+                                            <Skeleton className="h-3 w-16" />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Skeleton className="h-6 w-3/4" />
+                                        <Skeleton className="h-4 w-full" />
+                                        <Skeleton className="h-4 w-2/3" />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <Skeleton className="h-14 rounded-xl" />
+                                        <Skeleton className="h-14 rounded-xl" />
+                                    </div>
+                                    <Skeleton className="h-12 w-full rounded-xl" />
+                                </div>
+                            ))}
                         </div>
                     ) : gigs.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-20 px-6 bg-[#1e1e1e] rounded-2xl border border-dashed border-[#3a3127] text-center">

@@ -15,7 +15,12 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(reusabl
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         token_data = TokenPayload(**payload)
-    except:
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token has expired",
+        )
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
@@ -24,3 +29,11 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(reusabl
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
+
+def require_venue_role(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role != "venue" and not current_user.venue_profile:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User does not have venue permissions",
+        )
+    return current_user

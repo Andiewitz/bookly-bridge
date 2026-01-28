@@ -10,6 +10,7 @@ import {
 import api from '@/services/api';
 import { cn } from '@/lib/utils';
 import { AudioPlayer } from '@/components/profile/AudioPlayer';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function PublicProfilePage() {
     const params = useParams();
@@ -38,9 +39,28 @@ export default function PublicProfilePage() {
 
     if (loading) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] text-[#bcad9a]">
-                <Loader2 className="w-10 h-10 animate-spin mb-4 text-[#ff8c00]" />
-                <p className="font-display font-medium uppercase tracking-widest text-sm animate-pulse">Fetching public records...</p>
+            <div className="min-h-screen pb-20">
+                <Skeleton className="h-64 md:h-80 w-full rounded-none opacity-20" />
+                <div className="max-w-5xl mx-auto px-8 -mt-32 relative z-20">
+                    <div className="flex flex-col md:flex-row gap-8 items-end md:items-start mb-12">
+                        <Skeleton className="size-40 md:size-48 rounded-3xl" />
+                        <div className="flex-1 space-y-4 pb-4">
+                            <Skeleton className="h-10 w-2/3" />
+                            <Skeleton className="h-5 w-1/3" />
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                        <div className="lg:col-span-2 space-y-8">
+                            <Skeleton className="h-4 w-20" />
+                            <Skeleton className="h-32 w-full" />
+                            <Skeleton className="h-40 w-full" />
+                        </div>
+                        <div className="space-y-6">
+                            <Skeleton className="h-60 w-full rounded-2xl" />
+                            <Skeleton className="h-40 w-full rounded-2xl" />
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }

@@ -10,9 +10,15 @@ async def startup_event():
     await init_mongo()
 
 # Configure CORS
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    # Add production frontend URL here
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust for production
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

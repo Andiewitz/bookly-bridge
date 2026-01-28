@@ -5,14 +5,14 @@ from app.db.session import get_db
 from app.models.user import User
 from app.models.gig_mongo import GigPost
 from app.schemas.gig import MongoGigPostCreate, MongoGigPostResponse
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, require_venue_role
 
 router = APIRouter()
 
 @router.post("/", response_model=MongoGigPostResponse)
 async def create_gig_posting(
     gig_in: MongoGigPostCreate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_venue_role),
 ) -> Any:
     # In a real app, we'd check if they have a venue profile. 
     # For now, we'll use the 'author_name' from the email or a placeholder.

@@ -1,4 +1,5 @@
 from typing import Any, Union
+import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.db.session import get_db
@@ -55,7 +56,7 @@ def update_my_profile(
 
 @router.get("/{user_id}", response_model=Union[BandProfileResponse, VenueProfileResponse])
 def get_profile_by_id(
-    user_id: Any,
+    user_id: uuid.UUID,
     db: Session = Depends(get_db)
 ) -> Any:
     user = db.query(User).filter(User.id == user_id).first()
