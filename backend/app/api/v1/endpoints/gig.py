@@ -14,13 +14,15 @@ async def create_gig_posting(
     gig_in: MongoGigPostCreate,
     current_user: User = Depends(require_venue_role),
 ) -> Any:
-    # In a real app, we'd check if they have a venue profile. 
-    # For now, we'll use the 'author_name' from the email or a placeholder.
+    # Get venue name from profile if possible
+    author_name = current_user.email.split('@')[0].capitalize()
+    if current_user.venue_profile:
+        author_name = current_user.venue_profile.venue_name
     
     new_post = GigPost(
         author_id=current_user.id,
-        author_name=current_user.email.split('@')[0].capitalize(), # Simple fallback
-        avatar_char=current_user.email[0].upper(),
+        author_name=author_name,
+        avatar_char=author_name[0].upper(),
         **gig_in.dict()
     )
     await new_post.insert()
@@ -68,3 +70,19 @@ async def get_gig_posting(
     pd = post.dict()
     pd["id"] = str(post.id)
     return pd
+
+@router.get("/me/managed", response_model=List[MongoGigPostResponse])
+async def list_my_managed_gigs(
+    current_user: User = Depends(require_venue_role),
+) -> Any:
+    """
+    List gigs created by the current venue.
+    """
+    posts = await GigPost.find(GigPost.author_id == current_user.id).to_list()
+    
+    results = []
+    for p in posts:
+        pd = p.dict()
+        pd["id"] = str(p.id)
+        results.append(pd)
+    return results

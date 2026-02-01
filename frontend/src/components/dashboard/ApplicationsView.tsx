@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { User, CheckCircle2, XCircle, MessageSquare, Phone, Instagram, Loader2, Music2, ExternalLink } from 'lucide-react';
+import Link from 'next/link';
 import api from '@/services/api';
 
 export default function ApplicationsView() {
@@ -68,7 +69,9 @@ export default function ApplicationsView() {
                                 {app.applicant_name[0]}
                             </div>
                             <div>
-                                <h3 className="font-bold text-lg text-white">{app.applicant_name}</h3>
+                                <Link href={`/dashboard/profile/${app.applicant_id}`} className="hover:underline">
+                                    <h3 className="font-bold text-lg text-white">{app.applicant_name}</h3>
+                                </Link>
                                 <p className="text-sm text-[#bcad9a]">{app.message || "No message provided."}</p>
                                 <div className="mt-2 text-[10px] uppercase font-bold tracking-widest text-gray-500">
                                     Applied {new Date(app.created_at).toLocaleDateString()}

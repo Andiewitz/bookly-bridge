@@ -24,7 +24,7 @@ export default function PublicProfilePage() {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const res = await api.get(`/profile/${id}`);
+                const res = await api.get(`/profiles/${id}`);
                 setProfile(res.data);
             } catch (err: any) {
                 console.error('Failed to fetch profile:', err);

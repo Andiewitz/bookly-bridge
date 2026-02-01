@@ -14,12 +14,16 @@ async def create_application(
     app_in: ApplicationCreate,
     current_user: User = Depends(get_current_user),
 ) -> Any:
-    # 1. Verify gig exists
+    # 1. Verify user is an artist/band
+    if current_user.role != "band" or not current_user.band_profile:
+        raise HTTPException(status_code=403, detail="Only artists with a profile can apply to gigs")
+
+    # 2. Verify gig exists
     gig = await GigPost.get(PydanticObjectId(app_in.gig_id))
     if not gig:
         raise HTTPException(status_code=404, detail="Gig not found")
 
-    # 2. Check if already applied
+    # 3. Check if already applied
     existing = await GigApplication.find_one(
         GigApplication.gig_id == app_in.gig_id,
         GigApplication.applicant_id == current_user.id
@@ -27,12 +31,12 @@ async def create_application(
     if existing:
         raise HTTPException(status_code=400, detail="Already applied to this gig")
 
-    # 3. Create application
+    # 4. Create application
     new_app = GigApplication(
         gig_id=app_in.gig_id,
         author_id=gig.author_id,
         applicant_id=current_user.id,
-        applicant_name=current_user.email.split('@')[0].capitalize(), # Fallback
+        applicant_name=current_user.band_profile.band_name,
         message=app_in.message,
     )
     await new_app.insert()

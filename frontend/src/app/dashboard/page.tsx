@@ -1,10 +1,13 @@
+'use client';
+
 import React, { useEffect, useState } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
-import { Heart, Share2, Calendar, Clock, DollarSign, MoreHorizontal, Loader2, Music2 } from 'lucide-react';
+import { Heart, Share2, Calendar, Clock, DollarSign, MoreHorizontal, Loader2, Music2, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { OnboardingFlow } from '@/components/auth/OnboardingFlow';
 import ApplicationsView from '@/components/dashboard/ApplicationsView';
 import api from '@/services/api';
+import { ApplicationModal } from '@/components/dashboard/ApplicationModal';
 
 export default function DashboardPage() {
     const { user, currentContext } = useAuthStore();
@@ -12,12 +15,17 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(true);
     const [applyingId, setApplyingId] = useState<string | null>(null);
     const [appliedIds, setAppliedIds] = useState<Set<string>>(new Set());
+
+    // Application Modal State
+    const [selectedGig, setSelectedGig] = useState<any>(null);
+    const [isAppModalOpen, setIsAppModalOpen] = useState(false);
     const isFinding = currentContext === 'finding';
 
     const fetchPosts = async () => {
         setLoading(true);
         try {
-            const res = await api.get('/gigs/');
+            const endpoint = isFinding ? '/discovery/gigs' : '/gigs/me/managed';
+            const res = await api.get(endpoint);
             setPosts(res.data);
         } catch (err) {
             console.error('Failed to fetch posts:', err);
@@ -42,17 +50,23 @@ export default function DashboardPage() {
         }
     }, [user, currentContext, isFinding]);
 
-    const handleApply = async (gigId: string) => {
-        setApplyingId(gigId);
+    const handleApply = async (message: string) => {
+        if (!selectedGig) return;
+        setApplyingId(selectedGig.id);
         try {
-            await api.post('/applications/', { gig_id: gigId, message: "Interested in this gig!" });
-            setAppliedIds(prev => new Set(prev).add(gigId));
+            await api.post('/applications/', { gig_id: selectedGig.id, message });
+            setAppliedIds(prev => new Set(prev).add(selectedGig.id));
         } catch (err) {
             console.error('Failed to apply:', err);
             alert('Failed to apply. You might have already applied.');
         } finally {
             setApplyingId(null);
         }
+    };
+
+    const handleOpenApply = (post: any) => {
+        setSelectedGig(post);
+        setIsAppModalOpen(true);
     };
 
     // Onboarding Gate
@@ -147,7 +161,7 @@ export default function DashboardPage() {
 
                                     {/* Gig Visual Specs */}
                                     <div className="bg-black/40 rounded-xl p-4 border border-[#2A2A2A] mb-6">
-                                        <div className="grid grid-cols-3 gap-4">
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                             <div className="flex flex-col">
                                                 <span className="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 flex items-center gap-1">
                                                     <Calendar className="size-3" /> Date
@@ -166,6 +180,12 @@ export default function DashboardPage() {
                                                 </span>
                                                 <span className="text-[#ff8c00] text-sm font-bold">{post.pay}</span>
                                             </div>
+                                            <div className="flex flex-col col-span-2 md:col-span-1">
+                                                <span className="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 flex items-center gap-1">
+                                                    <MapPin className="size-3" /> Location
+                                                </span>
+                                                <span className="text-white text-xs font-medium truncate" title={post.formatted_address}>{post.formatted_address || post.borough || 'TBD'}</span>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -179,9 +199,9 @@ export default function DashboardPage() {
                                                 <Share2 className="w-5 h-5" /> Share
                                             </button>
                                         </div>
-                                        {isFinding && (
+                                        {isFinding ? (
                                             <button
-                                                onClick={() => handleApply(post.id)}
+                                                onClick={() => handleOpenApply(post)}
                                                 disabled={appliedIds.has(post.id) || applyingId === post.id}
                                                 className={`font-black uppercase tracking-widest text-[10px] px-6 py-2.5 rounded-xl transition-all shadow-[0_0_15px_rgba(255,140,0,0.1)] ${appliedIds.has(post.id)
                                                     ? 'bg-green-500/20 text-green-400 border border-green-500/30 cursor-default'
@@ -196,6 +216,11 @@ export default function DashboardPage() {
                                                     'Apply Now'
                                                 )}
                                             </button>
+                                        ) : (
+                                            <div className="flex gap-2">
+                                                <button className="text-[10px] font-bold uppercase tracking-widest px-4 py-2 border border-[#3a3127] rounded-lg hover:bg-white/5 transition-all text-[#bcad9a]">Edit</button>
+                                                <button className="text-[10px] font-bold uppercase tracking-widest px-4 py-2 bg-red-500/10 text-red-400 border border-red-500/20 rounded-lg hover:bg-red-500/20 transition-all">Close</button>
+                                            </div>
                                         )}
                                     </div>
                                 </div>
@@ -204,6 +229,14 @@ export default function DashboardPage() {
                     </div>
                 )}
             </div>
+
+            <ApplicationModal
+                isOpen={isAppModalOpen}
+                onClose={() => setIsAppModalOpen(false)}
+                onConfirm={handleApply}
+                gigTitle={selectedGig?.title || ''}
+                venueName={selectedGig?.author_name || 'the venue'}
+            />
         </div>
     );
 }

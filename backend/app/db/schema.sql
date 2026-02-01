@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS band_profiles (
     youtube VARCHAR(255),
     contact_method VARCHAR(20) CHECK (contact_method IN ('whatsapp', 'instagram', 'email')),
     whatsapp_number VARCHAR(20),
+    messenger_username VARCHAR(255),
     contact_email VARCHAR(255),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -50,6 +51,7 @@ CREATE TABLE IF NOT EXISTS venue_profiles (
     typical_genres TEXT[], -- Array of genres
     contact_method VARCHAR(20) CHECK (contact_method IN ('whatsapp', 'instagram', 'email')),
     whatsapp_number VARCHAR(20),
+    messenger_username VARCHAR(255),
     instagram VARCHAR(255),
     contact_email VARCHAR(255),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

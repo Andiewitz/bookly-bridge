@@ -7,6 +7,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import api from '@/services/api';
 import Link from 'next/link';
 import { Music2, Eye, EyeOff } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function RegisterPage() {
     const [loading, setLoading] = useState(false);
@@ -15,7 +16,7 @@ export default function RegisterPage() {
     const router = useRouter();
     const setAuth = useAuthStore((state) => state.setAuth);
 
-    const { register, handleSubmit, formState: { errors } } = useForm();
+    const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm();
 
     const onSubmit = async (data: any) => {
         setLoading(true);
@@ -25,7 +26,10 @@ export default function RegisterPage() {
             const loginRes = await api.post('/auth/login', { email: data.email, password: data.password });
             const { access_token, refresh_token } = loginRes.data;
 
-            setAuth(loginRes.data, access_token, refresh_token);
+            localStorage.setItem('access_token', access_token);
+
+            const profileRes = await api.get('/users/me');
+            setAuth(profileRes.data, access_token, refresh_token);
             router.push('/dashboard');
         } catch (err: any) {
             setError(err.response?.data?.detail || 'Registration failed. Please try again.');
@@ -80,6 +84,37 @@ export default function RegisterPage() {
                     {/* Registration Form */}
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         <div className="flex flex-col gap-4">
+                            {/* Role Selection */}
+                            <div className="flex flex-col mb-2">
+                                <span className="text-white/60 text-sm font-medium mb-3 ml-1">I am a...</span>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => setValue('role', 'band', { shouldValidate: true })}
+                                        className={cn(
+                                            "flex flex-col items-center justify-center p-4 rounded-xl border transition-all gap-2 bg-[#212121]",
+                                            watch('role') === 'band' ? "border-[#ff8c00] bg-orange-500/5" : "border-[#424242] hover:border-white/20"
+                                        )}
+                                    >
+                                        <Music2 className={cn("size-6", watch('role') === 'band' ? "text-[#ff8c00]" : "text-white/40")} />
+                                        <span className={cn("text-xs font-bold uppercase tracking-wider", watch('role') === 'band' ? "text-white" : "text-white/40")}>Band</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setValue('role', 'venue', { shouldValidate: true })}
+                                        className={cn(
+                                            "flex flex-col items-center justify-center p-4 rounded-xl border transition-all gap-2 bg-[#212121]",
+                                            watch('role') === 'venue' ? "border-[#ff8c00] bg-orange-500/5" : "border-[#424242] hover:border-white/20"
+                                        )}
+                                    >
+                                        <div className={cn("size-6 rounded-md", watch('role') === 'venue' ? "bg-[#ff8c00]" : "bg-white/10")} />
+                                        <span className={cn("text-xs font-bold uppercase tracking-wider", watch('role') === 'venue' ? "text-white" : "text-white/40")}>Venue</span>
+                                    </button>
+                                </div>
+                                <input type="hidden" {...register('role', { required: 'Please select a role' })} />
+                                {errors.role && <span className="text-xs text-red-400 ml-1 mt-2">{errors.role.message as string}</span>}
+                            </div>
+
                             <label className="flex flex-col">
                                 <span className="text-white/60 text-sm font-medium mb-2 ml-1">Email Address</span>
                                 <input

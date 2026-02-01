@@ -4,6 +4,7 @@ import React from 'react';
 import { DashboardSidebar } from '@/components/layout/DashboardSidebar';
 import { MobileNav } from '@/components/layout/MobileNav';
 import { Search, Bell, MessageSquare, Menu, PlusCircle } from 'lucide-react';
+import Link from 'next/link';
 import { useAuthStore } from '@/store/useAuthStore';
 import { PostGigModal } from '@/components/dashboard/PostGigModal';
 import { useState } from 'react';
@@ -58,13 +59,13 @@ export default function DashboardLayout({
                     {/* Right Actions */}
                     <div className="flex items-center gap-4 ml-auto">
                         {isHosting && (
-                            <button
-                                onClick={() => setIsPostModalOpen(true)}
+                            <Link
+                                href="/dashboard/gigs/new"
                                 className="flex items-center gap-2 bg-[#ff8c00] text-black px-4 py-2 rounded-xl text-sm font-bold hover:shadow-[0_0_15px_rgba(255,140,0,0.3)] transition-all mr-2"
                             >
                                 <PlusCircle className="size-4" />
                                 <span className="hidden sm:inline">Post Gig</span>
-                            </button>
+                            </Link>
                         )}
 
                         <button className="relative flex size-10 items-center justify-center rounded-full bg-[#1E1E1E] text-white hover:bg-[#3a3127] transition-colors">
@@ -75,7 +76,7 @@ export default function DashboardLayout({
                             <MessageSquare className="w-5 h-5" />
                         </button>
                         <div className="h-8 w-[1px] bg-[#3a3127] mx-2" />
-                        <div className="flex items-center gap-3 cursor-pointer group">
+                        <Link href="/dashboard/profile" className="flex items-center gap-3 cursor-pointer group">
                             <div className="size-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 border-2 border-transparent group-hover:border-[#ff8c00] transition-colors flex items-center justify-center text-white font-bold">
                                 {user?.email?.[0].toUpperCase() || 'U'}
                             </div>
@@ -83,7 +84,7 @@ export default function DashboardLayout({
                                 <p className="text-sm font-bold leading-none text-white">{user?.email?.split('@')[0] || 'User'}</p>
                                 <p className="text-xs text-[#bcad9a] mt-1 capitalize">{currentContext === 'hosting' ? 'Venue Manager' : 'Artist'}</p>
                             </div>
-                        </div>
+                        </Link>
                     </div>
                 </header>
 

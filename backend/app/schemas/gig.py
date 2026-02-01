@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from uuid import UUID
 from datetime import datetime, date
 
@@ -32,6 +32,12 @@ class MongoGigPostCreate(BaseModel):
     description: str
     genre: str
     borough: Optional[str] = None
+    
+    # Location data
+    formatted_address: str
+    place_id: str
+    location: Dict[str, Any] # {'type': 'Point', 'coordinates': [lng, lat]}
+    
     date: str
     time: str
     pay: str

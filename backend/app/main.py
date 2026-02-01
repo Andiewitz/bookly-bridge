@@ -1,31 +1,32 @@
 from app.db.mongo import init_mongo
+from app.db.session import engine, Base
+from app.models.user import User
+from app.models.profile import BandProfile, VenueProfile
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.v1.endpoints import auth, profile, gig, request, user, application
+from app.api.v1.endpoints import auth, profile, gig, request, user, application, discovery
 
 app = FastAPI(title="Booklyn API", version="0.1.0")
 
 @app.on_event("startup")
 async def startup_event():
+    # Ensure Postgres tables exist
+    Base.metadata.create_all(bind=engine)
+    # Ensure Mongo indexes exist
     await init_mongo()
 
 # Configure CORS
-origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    # Add production frontend URL here
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],  # Adjust for production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
-app.include_router(profile.router, prefix="/api/v1/profile", tags=["profile"])
+app.include_router(discovery.router, prefix="/api/v1/discovery", tags=["discovery"])
+app.include_router(profile.router, prefix="/api/v1/profiles", tags=["profiles"])
 app.include_router(gig.router, prefix="/api/v1/gigs", tags=["gigs"])
 app.include_router(request.router, prefix="/api/v1/gig-requests", tags=["gig-requests"])
 app.include_router(user.router, prefix="/api/v1/users", tags=["users"])

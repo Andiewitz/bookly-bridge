@@ -17,15 +17,24 @@ class BandProfileBase(ProfileBase):
     instagram: Optional[str] = None
     spotify: Optional[str] = None
     youtube: Optional[str] = None
+    demo_url: Optional[str] = None
 
 class BandProfileCreate(BandProfileBase):
     pass
 
-class BandProfileUpdate(BandProfileBase):
+class BandProfileUpdate(BaseModel):
     band_name: Optional[str] = None
     genre: Optional[str] = None
     location_city: Optional[str] = None
     location_state: Optional[str] = None
+    bio: Optional[str] = None
+    demo_url: Optional[str] = None
+    instagram: Optional[str] = None
+    spotify: Optional[str] = None
+    youtube: Optional[str] = None
+    contact_method: Optional[str] = None
+    contact_email: Optional[EmailStr] = None
+    whatsapp_number: Optional[str] = None
 
 class VenueProfileBase(ProfileBase):
     venue_name: str
@@ -38,10 +47,17 @@ class VenueProfileBase(ProfileBase):
 class VenueProfileCreate(VenueProfileBase):
     pass
 
-class VenueProfileUpdate(VenueProfileBase):
+class VenueProfileUpdate(BaseModel):
     venue_name: Optional[str] = None
     location_city: Optional[str] = None
     location_state: Optional[str] = None
+    capacity: Optional[int] = None
+    typical_genres: Optional[List[str]] = None
+    bio: Optional[str] = None
+    instagram: Optional[str] = None
+    contact_method: Optional[str] = None
+    contact_email: Optional[EmailStr] = None
+    whatsapp_number: Optional[str] = None
 
 class BandProfileResponse(BandProfileBase):
     id: UUID

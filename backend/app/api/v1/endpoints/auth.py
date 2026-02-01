@@ -2,6 +2,7 @@ from datetime import timedelta
 from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from jose import jwt
 from app.core import auth
 from app.core.config import settings
 from app.db.session import get_db
@@ -23,6 +24,7 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)) -> Any:
     
     db_user = User(
         email=user_in.email,
+        role=user_in.role,
         password_hash=auth.get_password_hash(user_in.password),
     )
     db.add(db_user)

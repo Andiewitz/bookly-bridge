@@ -32,6 +32,7 @@ export const useAuthStore = create<AuthState>()(
             setAuth: (user, accessToken, refreshToken) => {
                 if (typeof window !== 'undefined') {
                     localStorage.setItem('access_token', accessToken);
+                    localStorage.setItem('refresh_token', refreshToken);
                 }
                 set({ user, accessToken, refreshToken, isAuthenticated: true });
             },
@@ -39,6 +40,7 @@ export const useAuthStore = create<AuthState>()(
             logout: () => {
                 if (typeof window !== 'undefined') {
                     localStorage.removeItem('access_token');
+                    localStorage.removeItem('refresh_token');
                 }
                 set({ user: null, currentContext: 'finding', accessToken: null, refreshToken: null, isAuthenticated: false });
             },
