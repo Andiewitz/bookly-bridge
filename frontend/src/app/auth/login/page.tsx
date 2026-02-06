@@ -31,7 +31,11 @@ export default function LoginPage() {
             setAuth(profileRes.data, access_token, refresh_token);
             router.push('/dashboard');
         } catch (err: any) {
-            setError(err.response?.data?.detail || 'Login failed. Please check your credentials.');
+            if (!err.response) {
+                setError(`Network error: Cannot reach the server at ${api.defaults.baseURL}. Please check your connection.`);
+            } else {
+                setError(err.response?.data?.detail || 'Login failed. Please check your credentials.');
+            }
         } finally {
             setLoading(false);
         }

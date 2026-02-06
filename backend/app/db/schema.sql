@@ -35,10 +35,7 @@ CREATE TABLE IF NOT EXISTS band_profiles (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_band_genre ON band_profiles(genre);
-CREATE INDEX IF NOT EXISTS idx_band_location ON band_profiles(location_city, location_state);
-
--- Venue Profiles
+-- Active Venue Profiles
 CREATE TABLE IF NOT EXISTS venue_profiles (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
@@ -48,7 +45,7 @@ CREATE TABLE IF NOT EXISTS venue_profiles (
     capacity INTEGER,
     bio TEXT,
     photo_url TEXT,
-    typical_genres TEXT[], -- Array of genres
+    typical_genres TEXT[],
     contact_method VARCHAR(20) CHECK (contact_method IN ('whatsapp', 'instagram', 'email')),
     whatsapp_number VARCHAR(20),
     messenger_username VARCHAR(255),
@@ -58,36 +55,38 @@ CREATE TABLE IF NOT EXISTS venue_profiles (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_venue_location ON venue_profiles(location_city, location_state);
-
--- Gig Postings (from venues)
+-- Simplified Gig Postings (Merged from Mongo)
 CREATE TABLE IF NOT EXISTS gig_postings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     venue_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    venue_name VARCHAR(255),
     title VARCHAR(255) NOT NULL,
-    date_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    date DATE NOT NULL,
+    time VARCHAR(50) NOT NULL,
     genre VARCHAR(100) NOT NULL,
     description TEXT,
-    pay_range VARCHAR(100),
+    pay VARCHAR(100),
+    formatted_address TEXT,
+    location_lat DECIMAL(9,6),
+    location_lng DECIMAL(9,6),
+    status VARCHAR(20) DEFAULT 'open',
+    tags TEXT[],
+    photo_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_gigs_genre ON gig_postings(genre);
-CREATE INDEX IF NOT EXISTS idx_gigs_date ON gig_postings(date_time);
-
--- Gig Requests (from bands)
-CREATE TABLE IF NOT EXISTS gig_requests (
+-- Gig Applications (Moved from Mongo)
+CREATE TABLE IF NOT EXISTS gig_applications (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    band_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    available_from DATE NOT NULL,
-    available_to DATE NOT NULL,
-    genres TEXT[] NOT NULL,
-    willing_to_travel BOOLEAN DEFAULT FALSE,
-    max_distance INTEGER,
-    notes TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    gig_id UUID REFERENCES gig_postings(id) ON DELETE CASCADE,
+    applicant_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    venue_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    applicant_name VARCHAR(255),
+    applicant_avatar TEXT,
+    message TEXT,
+    status VARCHAR(20) DEFAULT 'pending', -- pending, accepted, declined
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Refresh Tokens
@@ -99,9 +98,7 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user ON refresh_tokens(user_id);
-
--- Updated_at Trigger (Optional but good practice)
+-- Simple Trigger for updated_at
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -114,4 +111,3 @@ CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users FOR EACH ROW EXECU
 CREATE TRIGGER update_band_profiles_updated_at BEFORE UPDATE ON band_profiles FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 CREATE TRIGGER update_venue_profiles_updated_at BEFORE UPDATE ON venue_profiles FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 CREATE TRIGGER update_gig_postings_updated_at BEFORE UPDATE ON gig_postings FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
-CREATE TRIGGER update_gig_requests_updated_at BEFORE UPDATE ON gig_requests FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();

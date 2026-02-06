@@ -21,7 +21,7 @@ export default function GigDetailPage() {
                 setGig(gigRes.data);
 
                 // Fetch venue profile to get contact info
-                const venueRes = await api.get(`/profile/${gigRes.data.venue_id}`);
+                const venueRes = await api.get(`/profiles/${gigRes.data.venue_id}`);
                 setVenue(venueRes.data);
             } catch (err) {
                 console.error('Failed to fetch gig details', err);
@@ -32,13 +32,13 @@ export default function GigDetailPage() {
         fetchDetails();
     }, [id]);
 
-    if (loading) return <div className="p-20 text-center animate-pulse">Loading gig details...</div>;
-    if (!gig) return <div className="p-20 text-center">Gig not found.</div>;
+    if (loading) return <div className="p-20 text-center animate-pulse text-[#bcad9a]">Loading gig details...</div>;
+    if (!gig) return <div className="p-20 text-center text-[#bcad9a]">Gig not found.</div>;
 
     return (
         <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <button onClick={() => router.back()} className="flex items-center gap-2 text-muted hover:text-primary transition-colors mb-4 group">
-                <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+            <button onClick={() => router.back()} className="flex items-center gap-2 text-[#bcad9a] hover:text-white transition-colors mb-4 group font-bold uppercase tracking-widest text-xs">
+                <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                 Back to browse
             </button>
 
@@ -46,28 +46,28 @@ export default function GigDetailPage() {
                 <div className="lg:col-span-2 space-y-8">
                     <header className="space-y-4">
                         <div className="flex items-center gap-3">
-                            <span className="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full border border-primary/20">
+                            <span className="px-3 py-1 bg-[#ff8c00]/10 text-[#ff8c00] text-[10px] font-black rounded-full border border-[#ff8c00]/20 uppercase tracking-widest">
                                 {gig.genre}
                             </span>
-                            {gig.pay_range && (
-                                <span className="px-3 py-1 bg-green-500/10 text-green-500 text-xs font-bold rounded-full border border-green-500/20">
-                                    {gig.pay_range}
+                            {gig.pay && (
+                                <span className="px-3 py-1 bg-green-500/10 text-green-500 text-[10px] font-black rounded-full border border-green-500/20 uppercase tracking-widest">
+                                    {gig.pay}
                                 </span>
                             )}
                         </div>
-                        <h1 className="text-4xl font-black">{gig.title}</h1>
-                        <div className="flex flex-wrap items-center gap-6 text-muted">
+                        <h1 className="text-5xl font-black text-white italic uppercase tracking-tighter">{gig.title}</h1>
+                        <div className="flex flex-wrap items-center gap-6 text-[#bcad9a]">
                             <div className="flex items-center gap-2">
-                                <Calendar size={18} className="text-primary" />
-                                <span className="font-medium text-foreground">{new Date(gig.date_time).toLocaleDateString()}</span>
+                                <Calendar size={18} className="text-[#ff8c00]" />
+                                <span className="font-bold text-sm uppercase tracking-widest">{gig.date}</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <Clock size={18} className="text-primary" />
-                                <span className="font-medium text-foreground">{new Date(gig.date_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                <Clock size={18} className="text-[#ff8c00]" />
+                                <span className="font-bold text-sm uppercase tracking-widest">{gig.time}</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <MapPin size={18} className="text-primary" />
-                                <span className="font-medium text-foreground">{venue?.location_city}, {venue?.location_state}</span>
+                                <MapPin size={18} className="text-[#ff8c00]" />
+                                <span className="font-bold text-sm uppercase tracking-widest">{gig.formatted_address}</span>
                             </div>
                         </div>
                     </header>

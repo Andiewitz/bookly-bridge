@@ -172,11 +172,29 @@ export default function SetupBandPage() {
                         </div>
 
                         <div>
-                            <label className="block text-xs font-black text-[#bcad9a] uppercase tracking-widest mb-3 ml-1">Contact Detail</label>
+                            <label className="block text-xs font-black text-[#bcad9a] uppercase tracking-widest mb-3 ml-1">Email for Booking</label>
                             <input
-                                {...register('contact_email')}
+                                {...register('contact_email', { required: 'Contact email is required' })}
                                 className="w-full bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl px-6 py-4 text-white focus:border-[#ff8c00] outline-none transition-all"
-                                placeholder="Where should venues reach you?"
+                                placeholder="booking@yourband.com"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-black text-[#bcad9a] uppercase tracking-widest mb-3 ml-1">WhatsApp Number (Optional)</label>
+                            <input
+                                {...register('whatsapp_number')}
+                                className="w-full bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl px-6 py-4 text-white focus:border-[#ff8c00] outline-none transition-all"
+                                placeholder="+1 (555) 000-0000"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-black text-[#bcad9a] uppercase tracking-widest mb-3 ml-1">Instagram (@handle)</label>
+                            <input
+                                {...register('instagram')}
+                                className="w-full bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl px-6 py-4 text-white focus:border-[#ff8c00] outline-none transition-all"
+                                placeholder="@yourartistaccount"
                             />
                         </div>
                     </div>

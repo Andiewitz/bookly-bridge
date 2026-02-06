@@ -1,20 +1,20 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: oklch(0.6 0.15 250);
-  /* A nice blue */
-  --color-secondary: oklch(0.7 0.1 200);
-  /* A complementary teal */
-  --color-accent: oklch(0.65 0.25 350);
-  /* A vibrant pink/purple */
-  --color-background: oklch(0.12 0.02 260);
-  /* Deep, rich dark background */
-  --color-foreground: oklch(0.98 0.01 250);
-  /* Off-white text */
-  --color-card: oklch(0.16 0.03 260);
-  /* Slightly lighter card bg */
-  --color-muted: oklch(0.6 0.05 250);
-  /* Muted text */
+  --color-primary: #ff8c00;
+  /* Booklyn Orange */
+  --color-secondary: #ffb700;
+  /* Amber/Gold */
+  --color-accent: #ffae00;
+  /* Deep Gold */
+  --color-background: #0a0a0a;
+  /* Total Dark */
+  --color-foreground: #fafafa;
+  /* Crisp White */
+  --color-card: #151515;
+  /* Surface */
+  --color-muted: #888888;
+  /* Muted grey */
 
   /* Auth Page Colors */
   --color-auth-primary: #ff8c00;

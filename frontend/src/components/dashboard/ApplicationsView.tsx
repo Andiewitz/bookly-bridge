@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { User, CheckCircle2, XCircle, MessageSquare, Phone, Instagram, Loader2, Music2, ExternalLink } from 'lucide-react';
+import { User, CheckCircle2, XCircle, MessageSquare, Phone, Instagram, Loader2, Music2, ExternalLink, Mail } from 'lucide-react';
 import Link from 'next/link';
 import api from '@/services/api';
 
@@ -99,17 +99,39 @@ export default function ApplicationsView() {
                                 </>
                             ) : app.status === 'accepted' ? (
                                 <div className="flex flex-col gap-2 w-full md:w-64">
-                                    <span className="text-[10px] font-bold text-green-400 uppercase tracking-widest mb-1 text-center">Connected! Shoot them a message:</span>
+                                    <span className="text-[10px] font-bold text-green-400 uppercase tracking-widest mb-1 text-center font-display">Connected! Reach out now:</span>
                                     <div className="flex gap-2">
-                                        <button className="flex-1 py-2 bg-[#25D366] text-white rounded-lg flex items-center justify-center hover:opacity-90 transition-opacity">
-                                            <Phone className="size-4" />
-                                        </button>
-                                        <button className="flex-1 py-2 bg-[#0084FF] text-white rounded-lg flex items-center justify-center hover:opacity-90 transition-opacity">
-                                            <MessageSquare className="size-4" />
-                                        </button>
-                                        <button className="flex-1 py-2 bg-gradient-to-tr from-[#F58529] via-[#D6249F] to-[#285AEB] text-white rounded-lg flex items-center justify-center hover:opacity-90 transition-opacity">
-                                            <Instagram className="size-4" />
-                                        </button>
+                                        {app.applicant_whatsapp && (
+                                            <a
+                                                href={`https://wa.me/${app.applicant_whatsapp.replace(/\D/g, '')}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex-1 py-2 bg-[#25D366] text-white rounded-lg flex items-center justify-center hover:opacity-90 hover:shadow-[0_0_15px_rgba(37,211,102,0.4)] transition-all"
+                                                title="WhatsApp"
+                                            >
+                                                <Phone className="size-4" />
+                                            </a>
+                                        )}
+                                        {app.applicant_email && (
+                                            <a
+                                                href={`mailto:${app.applicant_email}`}
+                                                className="flex-1 py-2 bg-white/5 border border-white/10 text-white rounded-lg flex items-center justify-center hover:bg-white/10 transition-all font-bold"
+                                                title="Email"
+                                            >
+                                                <Mail className="size-4" />
+                                            </a>
+                                        )}
+                                        {app.applicant_instagram && (
+                                            <a
+                                                href={`https://instagram.com/${app.applicant_instagram.replace('@', '')}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex-1 py-2 bg-gradient-to-tr from-[#F58529] via-[#D6249F] to-[#285AEB] text-white rounded-lg flex items-center justify-center hover:opacity-90 hover:shadow-[0_0_15px_rgba(214,36,159,0.4)] transition-all"
+                                                title="Instagram"
+                                            >
+                                                <Instagram className="size-4" />
+                                            </a>
+                                        )}
                                     </div>
                                 </div>
                             ) : (

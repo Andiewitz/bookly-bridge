@@ -8,11 +8,14 @@ import { OnboardingFlow } from '@/components/auth/OnboardingFlow';
 import ApplicationsView from '@/components/dashboard/ApplicationsView';
 import api from '@/services/api';
 import { ApplicationModal } from '@/components/dashboard/ApplicationModal';
+import { DiscoveryMap } from '@/components/dashboard/DiscoveryMap';
+import { LayoutGrid, Map as MapIcon } from 'lucide-react';
 
 export default function DashboardPage() {
     const { user, currentContext } = useAuthStore();
     const [posts, setPosts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [viewMode, setViewMode] = useState<'feed' | 'map'>('feed');
     const [applyingId, setApplyingId] = useState<string | null>(null);
     const [appliedIds, setAppliedIds] = useState<Set<string>>(new Set());
 
@@ -80,17 +83,52 @@ export default function DashboardPage() {
 
     return (
         <div className="p-8">
-            <div className="max-w-3xl mx-auto flex flex-col gap-8">
+            <div className="max-w-4xl mx-auto flex flex-col gap-8">
                 {/* Conditional View for Hosts */}
                 {!isFinding && <ApplicationsView />}
 
-                {/* Section Title */}
+                {/* Section Title & View Toggle */}
                 <div className="flex items-center justify-between mb-2">
-                    <h2 className="text-xl font-bold font-display text-white">
-                        {isFinding ? 'Recommended Gigs' : 'Your Live Gigs'}
-                    </h2>
-                    <button className="text-sm text-[#FF8C00] hover:text-white transition-colors">View all</button>
+                    <div>
+                        <h2 className="text-3xl font-black font-display text-white uppercase italic tracking-tighter">
+                            {isFinding ? 'Explore Gigs' : 'Your Live Gigs'}
+                        </h2>
+                        <p className="text-[#bcad9a] text-xs font-bold uppercase tracking-widest mt-1">
+                            {isFinding ? `Discover calls for talent in Brooklyn` : 'Manage your postings and applicants'}
+                        </p>
+                    </div>
+
+                    {isFinding && (
+                        <div className="flex p-1 bg-black/40 rounded-xl border border-[#2A2A2A]">
+                            <button
+                                onClick={() => setViewMode('feed')}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'feed' ? 'bg-[#ff8c00] text-black shadow-[0_0_15px_rgba(255,140,0,0.3)]' : 'text-gray-500 hover:text-white'}`}
+                            >
+                                <LayoutGrid className="size-3" /> Feed
+                            </button>
+                            <button
+                                onClick={() => setViewMode('map')}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'map' ? 'bg-[#ff8c00] text-black shadow-[0_0_15px_rgba(255,140,0,0.3)]' : 'text-gray-500 hover:text-white'}`}
+                            >
+                                <MapIcon className="size-3" /> Map
+                            </button>
+                        </div>
+                    )}
                 </div>
+
+                {/* Quick Filters / Genres */}
+                {isFinding && (
+                    <div className="flex flex-wrap gap-2 overflow-x-auto pb-4 no-scrollbar">
+                        {['All Gigs', 'Jazz', 'Rock', 'Electronic', 'Acoustic', 'Classical'].map((genre) => (
+                            <button
+                                key={genre}
+                                className="px-5 py-2.5 bg-[#1E1E1E] border border-[#2A2A2A] rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-[#bcad9a] hover:border-[#ff8c00]/50 hover:text-white transition-all whitespace-nowrap italic"
+                            >
+                                {genre}
+                            </button>
+                        ))}
+                    </div>
+                )}
 
                 {loading ? (
                     <div className="flex flex-col items-center justify-center py-20 text-[#bcad9a]">
@@ -102,15 +140,19 @@ export default function DashboardPage() {
                         <div className="size-16 rounded-full bg-[#121212] flex items-center justify-center mb-6 text-[#bcad9a]">
                             <Music2 className="w-8 h-8" />
                         </div>
-                        <h3 className="text-xl font-bold text-white mb-2">No Gigs Found</h3>
-                        <p className="text-[#bcad9a] max-w-sm">
+                        <h3 className="text-xl font-bold text-white mb-2 font-display uppercase italic italic tracking-tighter">No Gigs Found</h3>
+                        <p className="text-[#bcad9a] max-w-sm text-sm">
                             {isFinding
                                 ? "There are no open calls for talent right now. Check back soon or refine your discovery settings."
                                 : "You haven't posted any gig opportunities yet. Switch to 'Post' to start booking talent."}
                         </p>
                     </div>
+                ) : viewMode === 'map' && isFinding ? (
+                    <div className="animate-fade-in">
+                        <DiscoveryMap gigs={posts} onApply={handleOpenApply} />
+                    </div>
                 ) : (
-                    <div className="flex flex-col gap-6">
+                    <div className="flex flex-col gap-8 pb-20 animate-slide-up">
                         {posts.map((post) => (
                             <article key={post.id} className="bg-[#1E1E1E] rounded-2xl border border-[#2A2A2A] overflow-hidden transition-all duration-300 group hover:border-[#ff8c00]/50 hover:shadow-2xl hover:shadow-[#ff8c00]/10 hover-lift hover-glow">
                                 <div className="p-6">
@@ -124,9 +166,9 @@ export default function DashboardPage() {
                                             </div>
                                             <div>
                                                 <div className="flex items-center gap-2">
-                                                    <h3 className="font-bold font-display text-lg text-white group-hover:text-[#FF8C00] transition-colors">
-                                                        <Link href={`/dashboard/profile/${post.author_id}`} className="hover:underline">
-                                                            {post.author_name || "The Venue"}
+                                                    <h3 className="font-bold font-display text-lg text-white group-hover:text-[#FF8C00] transition-colors text-right">
+                                                        <Link href={`/dashboard/profile/${post.venue_id}`} className="hover:underline">
+                                                            {post.venue_name || "The Venue"}
                                                         </Link>
                                                     </h3>
                                                     <span className="px-2 py-0.5 rounded-full bg-black border border-gray-800 text-[10px] uppercase tracking-wider text-gray-400">
@@ -143,15 +185,15 @@ export default function DashboardPage() {
 
                                     {/* Content */}
                                     <div className="mb-4">
-                                        <h4 className="text-lg font-bold text-white mb-2">{post.title}</h4>
-                                        <p className="text-gray-300 text-sm leading-relaxed mb-4 line-clamp-3">
+                                        <h4 className="text-xl font-black text-white mb-2 uppercase italic tracking-tighter">{post.title}</h4>
+                                        <p className="text-[#bcad9a] text-sm leading-relaxed mb-4 line-clamp-3">
                                             {post.description}
                                         </p>
 
                                         {post.tags && post.tags.length > 0 && (
                                             <div className="flex flex-wrap gap-2 mb-4">
                                                 {post.tags.map((tag: string, i: number) => (
-                                                    <span key={i} className="px-3 py-1 bg-black rounded-md text-[10px] font-bold uppercase tracking-widest text-[#FF8C00] border border-[#2A2A2A]">
+                                                    <span key={i} className="px-3 py-1 bg-[#ff8c00]/10 rounded-md text-[10px] font-black uppercase tracking-widest text-[#ff8c00] border border-[#ff8c00]/20 italic">
                                                         #{tag}
                                                     </span>
                                                 ))}
@@ -160,31 +202,31 @@ export default function DashboardPage() {
                                     </div>
 
                                     {/* Gig Visual Specs */}
-                                    <div className="bg-black/40 rounded-xl p-4 border border-[#2A2A2A] mb-6">
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div className="bg-black/40 rounded-3xl p-6 border border-[#2A2A2A] mb-6">
+                                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
                                             <div className="flex flex-col">
-                                                <span className="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 flex items-center gap-1">
-                                                    <Calendar className="size-3" /> Date
+                                                <span className="text-[10px] uppercase text-[#bcad9a] font-black tracking-widest mb-1 flex items-center gap-1">
+                                                    <Calendar className="size-3 text-[#ff8c00]" /> Date
                                                 </span>
-                                                <span className="text-white text-sm font-medium">{post.date}</span>
+                                                <span className="text-white text-sm font-bold uppercase">{post.date}</span>
                                             </div>
                                             <div className="flex flex-col">
-                                                <span className="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 flex items-center gap-1">
-                                                    <Clock className="size-3" /> Time
+                                                <span className="text-[10px] uppercase text-[#bcad9a] font-black tracking-widest mb-1 flex items-center gap-1">
+                                                    <Clock className="size-3 text-[#ff8c00]" /> Time
                                                 </span>
-                                                <span className="text-white text-sm font-medium">{post.time}</span>
+                                                <span className="text-white text-sm font-bold uppercase">{post.time}</span>
                                             </div>
                                             <div className="flex flex-col">
-                                                <span className="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 flex items-center gap-1">
-                                                    <DollarSign className="size-3" /> Pay
+                                                <span className="text-[10px] uppercase text-[#bcad9a] font-black tracking-widest mb-1 flex items-center gap-1 text-right">
+                                                    <DollarSign className="size-3 text-[#ff8c00]" /> Pay
                                                 </span>
-                                                <span className="text-[#ff8c00] text-sm font-bold">{post.pay}</span>
+                                                <span className="text-[#ff8c00] text-sm font-black italic">{post.pay}</span>
                                             </div>
-                                            <div className="flex flex-col col-span-2 md:col-span-1">
-                                                <span className="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1 flex items-center gap-1">
-                                                    <MapPin className="size-3" /> Location
+                                            <div className="flex flex-col col-span-2 lg:col-span-1">
+                                                <span className="text-[10px] uppercase text-[#bcad9a] font-black tracking-widest mb-1 flex items-center gap-1">
+                                                    <MapPin className="size-3 text-[#ff8c00]" /> Location
                                                 </span>
-                                                <span className="text-white text-xs font-medium truncate" title={post.formatted_address}>{post.formatted_address || post.borough || 'TBD'}</span>
+                                                <span className="text-white text-xs font-bold truncate uppercase tracking-tight" title={post.formatted_address}>{post.formatted_address || post.borough || 'TBD'}</span>
                                             </div>
                                         </div>
                                     </div>

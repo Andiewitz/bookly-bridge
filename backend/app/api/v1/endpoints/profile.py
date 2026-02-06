@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any, Union, List
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -71,3 +71,8 @@ def get_profile_by_id(
     if not profile:
         raise HTTPException(status_code=404, detail="Profile not found")
     return profile
+@router.get("/venues/all", response_model=List[VenueProfileResponse])
+def list_venue_profiles(
+    db: Session = Depends(get_db)
+) -> Any:
+    return db.query(VenueProfile).all()

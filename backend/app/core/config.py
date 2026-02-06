@@ -15,7 +15,6 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = os.getenv("POSTGRES_DB", "booklyn")
     POSTGRES_HOST: str = os.getenv("POSTGRES_HOST", "localhost")
     POSTGRES_PORT: str = os.getenv("POSTGRES_PORT", "5432")
-    MONGO_URL: str = os.getenv("MONGO_URL", "mongodb://localhost:27017/booklyn")
     
     @property
     def DATABASE_URL(self) -> str:

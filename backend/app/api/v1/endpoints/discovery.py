@@ -1,60 +1,48 @@
 from typing import Any, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
-from app.models.gig_mongo import GigPost
-from app.schemas.gig import MongoGigPostResponse
+from sqlalchemy.orm import Session
+from app.db.session import get_db
+from app.models.gig import GigPosting
+from app.schemas.gig import GigPostingResponse
 import math
 
 router = APIRouter()
 
-@router.get("/gigs", response_model=List[MongoGigPostResponse])
-async def discover_gigs(
+@router.get("/gigs", response_model=List[GigPostingResponse])
+def discover_gigs(
+    db: Session = Depends(get_db),
     lat: Optional[float] = None,
     lng: Optional[float] = None,
-    radius_meters: float = 10000, # Default 10km
     genre: Optional[str] = None,
     search: Optional[str] = None,
     limit: int = 20,
     offset: int = 0
 ) -> Any:
     """
-    Explore gigs with Geo-spatial and Keyword search.
+    Explore gigs with simple filtering and search.
     """
-    query: dict = {"status": "open"}
+    query = db.query(GigPosting).filter(GigPosting.status == "open")
     
-    # Text search
+    # Simple search
     if search:
-        query["$text"] = {"$search": search}
+        query = query.filter(
+            (GigPosting.title.ilike(f"%{search}%")) | 
+            (GigPosting.description.ilike(f"%{search}%"))
+        )
         
     # Genre filter
     if genre:
-        query["genre"] = genre
+        query = query.filter(GigPosting.genre == genre)
 
-    # Geo-spatial query
-    if lat is not None and lng is not None:
-        query["location"] = {
-            "$near": {
-                "$geometry": {
-                    "type": "Point",
-                    "coordinates": [lng, lat]
-                },
-                "$maxDistance": radius_meters
-            }
-        }
+    # Note: Geo-spatial query is simplified/removed in the 'dumbed down' version
+    # because it usually requires PostGIS or complex math in SQL.
+    # We just return the latest matching gigs.
 
-    # Find and return
-    posts = await GigPost.find(query).limit(limit).skip(offset).to_list()
-    
-    results = []
-    for p in posts:
-        pd = p.dict()
-        pd["id"] = str(p.id)
-        results.append(pd)
-    return results
+    return query.order_by(GigPosting.created_at.desc()).offset(offset).limit(limit).all()
 
 @router.get("/venues", response_model=List[Any])
-async def discover_venues(
+def discover_venues(
     search: Optional[str] = None,
     genre: Optional[str] = None
 ) -> Any:
-    # This will be implemented when we have a more robust discovery for venue profiles themselves
     return []

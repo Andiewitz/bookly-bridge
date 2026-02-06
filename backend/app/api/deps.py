@@ -9,7 +9,7 @@ from app.core import auth
 from app.models.user import User
 from app.schemas.user import TokenPayload
 
-reusable_oauth2 = OAuth2PasswordBearer(tokenUrl=f"{settings.PROJECT_NAME}/api/v1/auth/login")
+reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 def get_current_user(db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)) -> User:
     try:

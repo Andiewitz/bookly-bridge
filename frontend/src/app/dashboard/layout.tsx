@@ -17,6 +17,22 @@ export default function DashboardLayout({
     const { user, currentContext } = useAuthStore();
     const [isPostModalOpen, setIsPostModalOpen] = useState(false);
 
+    const [unreadCount, setUnreadCount] = useState(0);
+
+    useEffect(() => {
+        const fetchUnread = async () => {
+            try {
+                const res = await api.get('/notifications');
+                setUnreadCount(res.data.filter((n: any) => !n.is_read).length);
+            } catch (err) {
+                console.error('Failed to fetch unread count:', err);
+            }
+        };
+        fetchUnread();
+        const interval = setInterval(fetchUnread, 30000); // Check every 30s
+        return () => clearInterval(interval);
+    }, []);
+
     const isHosting = currentContext === 'hosting';
 
     return (
@@ -68,15 +84,20 @@ export default function DashboardLayout({
                             </Link>
                         )}
 
-                        <button className="relative flex size-10 items-center justify-center rounded-full bg-[#1E1E1E] text-white hover:bg-[#3a3127] transition-colors">
+                        <Link
+                            href="/dashboard/notifications"
+                            className="relative flex size-10 items-center justify-center rounded-full bg-[#1E1E1E] text-white hover:bg-[#3a3127] transition-colors"
+                        >
                             <Bell className="w-5 h-5" />
-                            <span className="absolute top-2.5 right-2.5 size-2 rounded-full bg-[#ff8c00] border-2 border-[#1E1E1E]" />
-                        </button>
+                            {unreadCount > 0 && (
+                                <span className="absolute top-2.5 right-2.5 size-2 rounded-full bg-[#ff8c00] border-2 border-[#1E1E1E]" />
+                            )}
+                        </Link>
                         <button className="flex size-10 items-center justify-center rounded-full bg-[#1E1E1E] text-white hover:bg-[#3a3127] transition-colors">
                             <MessageSquare className="w-5 h-5" />
                         </button>
                         <div className="h-8 w-[1px] bg-[#3a3127] mx-2" />
-                        <Link href="/dashboard/profile" className="flex items-center gap-3 cursor-pointer group">
+                        <Link href="/dashboard/settings/profile" className="flex items-center gap-3 cursor-pointer group">
                             <div className="size-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 border-2 border-transparent group-hover:border-[#ff8c00] transition-colors flex items-center justify-center text-white font-bold">
                                 {user?.email?.[0].toUpperCase() || 'U'}
                             </div>

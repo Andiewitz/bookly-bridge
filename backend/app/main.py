@@ -1,10 +1,11 @@
-from app.db.mongo import init_mongo
+
 from app.db.session import engine, Base
 from app.models.user import User
 from app.models.profile import BandProfile, VenueProfile
+from app.models.notification import Notification
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.v1.endpoints import auth, profile, gig, request, user, application, discovery
+from app.api.v1.endpoints import auth, profile, gig, request, user, application, discovery, notification
 
 app = FastAPI(title="Booklyn API", version="0.1.0")
 
@@ -12,14 +13,13 @@ app = FastAPI(title="Booklyn API", version="0.1.0")
 async def startup_event():
     # Ensure Postgres tables exist
     Base.metadata.create_all(bind=engine)
-    # Ensure Mongo indexes exist
-    await init_mongo()
+    pass
 
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust for production
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -31,6 +31,7 @@ app.include_router(gig.router, prefix="/api/v1/gigs", tags=["gigs"])
 app.include_router(request.router, prefix="/api/v1/gig-requests", tags=["gig-requests"])
 app.include_router(user.router, prefix="/api/v1/users", tags=["users"])
 app.include_router(application.router, prefix="/api/v1/applications", tags=["applications"])
+app.include_router(notification.router, prefix="/api/v1/notifications", tags=["notifications"])
 
 @app.get("/")
 async def root():

@@ -32,7 +32,11 @@ export default function RegisterPage() {
             setAuth(profileRes.data, access_token, refresh_token);
             router.push('/dashboard');
         } catch (err: any) {
-            setError(err.response?.data?.detail || 'Registration failed. Please try again.');
+            if (!err.response) {
+                setError(`Network error: Cannot reach the server at ${api.defaults.baseURL}. Please check your connection.`);
+            } else {
+                setError(err.response?.data?.detail || 'Registration failed. Please try again.');
+            }
         } finally {
             setLoading(false);
         }

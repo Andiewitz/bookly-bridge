@@ -15,6 +15,7 @@ router = APIRouter()
 
 @router.post("/register", response_model=UserResponse)
 def register(user_in: UserCreate, db: Session = Depends(get_db)) -> Any:
+    print(f"DEBUG: Registering new user: {user_in.email} as {user_in.role}")
     user = db.query(User).filter(User.email == user_in.email).first()
     if user:
         raise HTTPException(
@@ -34,13 +35,23 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)) -> Any:
 
 @router.post("/login", response_model=Token)
 def login(user_in: UserLogin, db: Session = Depends(get_db)) -> Any:
+    print(f"DEBUG: Login attempt for email: {user_in.email}")
     user = db.query(User).filter(User.email == user_in.email).first()
-    if not user or not auth.verify_password(user_in.password, user.password_hash):
+    if not user:
+        print(f"DEBUG: User not found for email: {user_in.email}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
+            detail="Account with this email does not exist",
         )
     
+    if not auth.verify_password(user_in.password, user.password_hash):
+        print(f"DEBUG: Password verification failed for email: {user_in.email}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid password provided",
+        )
+    
+    print(f"DEBUG: Login successful for email: {user_in.email}")
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return {
         "access_token": auth.create_access_token(user.id, expires_delta=access_token_expires),

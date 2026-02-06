@@ -76,8 +76,20 @@ export default function NewGigPage() {
     }, [setValue]);
 
     const onSubmit = async (data: any) => {
-        if (!locationData) {
-            setError('Please select a verified address from the dropdown suggestions.');
+        let finalLocationData = locationData;
+
+        // Fallback for manual entry / Safe Mode
+        if (!finalLocationData && data.address) {
+            finalLocationData = {
+                formatted_address: data.address,
+                place_id: `manual_${Date.now()}`,
+                location: { type: 'Point', coordinates: [0, 0] },
+                borough: 'Unknown'
+            };
+        }
+
+        if (!finalLocationData) {
+            setError('Please enter a valid address.');
             return;
         }
 
@@ -90,7 +102,7 @@ export default function NewGigPage() {
             await api.post('/gigs/', {
                 ...data,
                 tags,
-                ...locationData
+                ...finalLocationData
             });
 
             setSuccess(true);

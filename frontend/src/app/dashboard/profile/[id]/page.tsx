@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import {
     MapPin, Calendar, Music, Users, Instagram, Phone,
     ExternalLink, Loader2, ArrowLeft, ShieldCheck, Heart, Share2,
-    Play, Pause, Volume2, Globe, MessageCircle
+    Play, Pause, Volume2, Globe, MessageCircle, Mail
 } from 'lucide-react';
 import api from '@/services/api';
 import { cn } from '@/lib/utils';
@@ -149,7 +149,10 @@ export default function PublicProfilePage() {
                                 <button className="size-12 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all">
                                     <Share2 className="size-5" />
                                 </button>
-                                <button className="px-8 py-3.5 bg-[#ff8c00] text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-orange-400 hover:shadow-[0_0_20px_rgba(255,140,0,0.3)] transition-all">
+                                <button
+                                    onClick={() => handleContact(profile)}
+                                    className="px-8 py-3.5 bg-[#ff8c00] text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-orange-400 hover:shadow-[0_0_20px_rgba(255,140,0,0.3)] transition-all font-display italic"
+                                >
                                     Contact Now
                                 </button>
                             </div>
@@ -162,7 +165,7 @@ export default function PublicProfilePage() {
                     {/* Left Column: Bio & Info */}
                     <div className="lg:col-span-2 space-y-10">
                         <section>
-                            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-[#ff8c00] mb-4">About</h2>
+                            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-[#ff8c00] mb-4 font-display">About</h2>
                             <p className="text-lg text-white leading-relaxed font-light">
                                 {profile.bio || "No biography provided yet. This user is probably too busy making music or hosting legendary nights."}
                             </p>
@@ -170,7 +173,7 @@ export default function PublicProfilePage() {
 
                         {isBand && (
                             <section className="bg-[#1E1E1E] rounded-2xl border border-[#2A2A2A] p-8">
-                                <h2 className="text-sm font-black uppercase tracking-widest text-white mb-6 flex items-center gap-3">
+                                <h2 className="text-sm font-black uppercase tracking-widest text-white mb-6 flex items-center gap-3 font-display italic">
                                     <Music className="size-5 text-[#ff8c00]" /> Featured Demo
                                 </h2>
 
@@ -190,10 +193,10 @@ export default function PublicProfilePage() {
 
                         {!isBand && profile.typical_genres && (
                             <section>
-                                <h2 className="text-xs font-black uppercase tracking-[0.2em] text-[#ff8c00] mb-6">Typical Genres</h2>
+                                <h2 className="text-xs font-black uppercase tracking-[0.2em] text-[#ff8c00] mb-6 font-display">Typical Genres</h2>
                                 <div className="flex flex-wrap gap-3">
                                     {profile.typical_genres.map((g: string) => (
-                                        <span key={g} className="px-6 py-3 bg-[#1E1E1E] border border-[#2A2A2A] rounded-xl text-sm font-bold text-white hover:border-[#ff8c00]/50 transition-all uppercase tracking-tighter">
+                                        <span key={g} className="px-6 py-3 bg-[#1E1E1E] border border-[#2A2A2A] rounded-xl text-sm font-black text-white hover:border-[#ff8c00]/50 transition-all uppercase tracking-tighter italic">
                                             {g}
                                         </span>
                                     ))}
@@ -205,7 +208,7 @@ export default function PublicProfilePage() {
                     {/* Right Column: Sidebar / Stats */}
                     <div className="space-y-8">
                         <div className="bg-[#1E1E1E] rounded-2xl border border-[#2A2A2A] p-6">
-                            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-[#ff8c00] mb-6">Details</h2>
+                            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-[#ff8c00] mb-6 font-display">Details</h2>
                             <div className="space-y-6">
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm text-[#bcad9a]">Joined</span>
@@ -217,30 +220,48 @@ export default function PublicProfilePage() {
                                 </div>
                                 <div className="h-px w-full bg-[#2A2A2A]" />
                                 <div className="space-y-4">
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-[#555]">Fast Connections</p>
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-[#555] font-display">Fast Connections</p>
                                     <div className="flex gap-2">
-                                        {profile.instagram_handle && (
-                                            <button className="flex-1 py-3 bg-white/[0.03] border border-white/5 rounded-xl flex items-center justify-center text-white hover:bg-white/10 transition-all">
+                                        {profile.instagram && (
+                                            <a
+                                                href={`https://instagram.com/${profile.instagram.replace('@', '')}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex-1 py-3 bg-white/[0.03] border border-white/5 rounded-xl flex items-center justify-center text-white hover:bg-white/10 transition-all"
+                                            >
                                                 <Instagram className="size-4" />
-                                            </button>
+                                            </a>
                                         )}
                                         {profile.whatsapp_number && (
-                                            <button className="flex-1 py-3 bg-white/[0.03] border border-white/5 rounded-xl flex items-center justify-center text-white hover:bg-white/10 transition-all">
+                                            <a
+                                                href={`https://wa.me/${profile.whatsapp_number.replace(/\D/g, '')}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex-1 py-3 bg-white/[0.03] border border-white/5 rounded-xl flex items-center justify-center text-white hover:bg-white/10 transition-all"
+                                            >
                                                 <Phone className="size-4" />
-                                            </button>
+                                            </a>
                                         )}
-                                        <button className="flex-1 py-3 bg-white/[0.03] border border-white/5 rounded-xl flex items-center justify-center text-white hover:bg-white/10 transition-all">
-                                            <Globe className="size-4" />
-                                        </button>
+                                        {profile.contact_email && (
+                                            <a
+                                                href={`mailto:${profile.contact_email}`}
+                                                className="flex-1 py-3 bg-white/[0.03] border border-white/5 rounded-xl flex items-center justify-center text-white hover:bg-white/10 transition-all"
+                                            >
+                                                <Mail className="size-4" />
+                                            </a>
+                                        )}
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <div className="bg-gradient-to-br from-[#ff8c00]/10 to-transparent rounded-2xl border border-[#ff8c00]/20 p-6">
-                            <h3 className="font-bold text-lg text-white mb-2">Book {isBand ? 'this Band' : 'this Venue'}</h3>
+                            <h3 className="font-bold text-lg text-white mb-2 font-display italic">Book {isBand ? 'this Band' : 'this Venue'}</h3>
                             <p className="text-sm text-[#bcad9a] mb-6 leading-relaxed">Direct messaging is encrypted and secure. Start a conversation today.</p>
-                            <button className="w-full py-3 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-[#ff8c00] transition-all">
+                            <button
+                                onClick={() => handleContact(profile)}
+                                className="w-full py-3 bg-[#ff8c00] text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-orange-400 transition-all font-display italic"
+                            >
                                 <MessageCircle className="size-4 inline-block mr-2 -mt-0.5" /> Start Chat
                             </button>
                         </div>
@@ -249,4 +270,16 @@ export default function PublicProfilePage() {
             </div>
         </div>
     );
+}
+
+// Add handleContact to the component scope
+function handleContact(profile: any) {
+    const method = profile.contact_method || 'email';
+    if (method === 'whatsapp' && profile.whatsapp_number) {
+        window.open(`https://wa.me/${profile.whatsapp_number.replace(/\D/g, '')}`, '_blank');
+    } else if (method === 'instagram' && profile.instagram) {
+        window.open(`https://instagram.com/${profile.instagram.replace('@', '')}`, '_blank');
+    } else if (profile.contact_email) {
+        window.location.href = `mailto:${profile.contact_email}`;
+    }
 }

@@ -15,10 +15,8 @@ export function DashboardSidebar() {
 
     const navItems = [
         { name: 'Home', href: '/dashboard', icon: Home, show: true },
-        { name: 'Discover', href: '/dashboard/browse', icon: Compass, show: isFinding },
-        { name: 'My Gigs', href: '/dashboard/gigs', icon: Music, show: true },
-        { name: 'Calendar', href: '/dashboard/calendar', icon: Calendar, show: true },
-        { name: 'Messages', href: '/dashboard/messages', icon: Mail, badge: 2, show: true },
+        { name: 'Venues', href: '/dashboard/venues', icon: Compass, show: isFinding },
+        { name: 'My Activity', href: '/dashboard/my-gigs', icon: Music, show: true },
         { name: 'Profile', href: '/dashboard/profile', icon: User, show: true },
     ];
 

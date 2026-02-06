@@ -176,6 +176,15 @@ export default function SetupVenuePage() {
                                 placeholder="+1 234 567 8900"
                             />
                         </div>
+
+                        <div>
+                            <label className="block text-xs font-black text-[#bcad9a] uppercase tracking-widest mb-3 ml-1">Messenger Handle (Optional)</label>
+                            <input
+                                {...register('messenger_username')}
+                                className="w-full bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl px-6 py-4 text-white focus:border-[#ff8c00] outline-none transition-all"
+                                placeholder="your.venue.messenger"
+                            />
+                        </div>
                     </div>
                 </section>
 
